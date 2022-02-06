@@ -1,0 +1,22 @@
+{
+  "name": "my-website-webapplication-denv",
+  "version": "1.0.0",
+  "description": "my First attempt for my website",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KRGRS/my-website-webapplication-denv.git"
+  },
+  "author": "Pascal Moll",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/KRGRS/my-website-webapplication-denv/issues"
+  },
+  "homepage": "https://github.com/KRGRS/my-website-webapplication-denv#readme",
+  "dependencies": {
+    "express": "^4.17.2"
+  }
+}
