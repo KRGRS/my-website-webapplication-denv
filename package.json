@@ -1,22 +1,33 @@
 {
   "name": "my-website-webapplication-denv",
   "version": "1.0.0",
-  "description": "my First attempt for my website",
-  "main": "index.js",
+  "description": "",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server",
+    "server": "nodemon server",
+    "client": "npm start --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\" "
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/KRGRS/my-website-webapplication-denv.git"
   },
-  "author": "Pascal Moll",
+  "keywords": [],
+  "author": "",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/KRGRS/my-website-webapplication-denv/issues"
   },
   "homepage": "https://github.com/KRGRS/my-website-webapplication-denv#readme",
   "dependencies": {
-    "express": "^4.17.2"
+    "assert": "^2.0.0",
+    "concurrently": "^7.0.0",
+    "express": "^4.17.2",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
+  },
+  "devDependencies": {
+    "html-to-react": "^1.4.8"
   }
 }

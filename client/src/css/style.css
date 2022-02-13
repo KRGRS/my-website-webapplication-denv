@@ -1,0 +1,152 @@
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    max-height: 150vh !important;
+    max-width: 200vh !important;
+}
+
+html {
+    font-size: 62.5%; 
+}
+
+#finishButton {
+    width: 100%; 
+    margin-top: 0.5rem; 
+    height: 3rem; 
+}
+
+.dropdown-list {
+    color: black; 
+    font-size: 1.5rem; 
+}
+
+#pagetitle {
+    color: black; 
+    font-size: 4rem;
+}
+
+#drawingCanvasDiv {
+    padding-left: 0rem; 
+    margin-left: 0rem;
+}
+
+#details-list {
+    padding: 0rem !important; 
+}
+
+.detailsListItem{
+    max-height: inherit;
+    padding: 0.1rem; 
+    margin: 0.1rem; 
+    background-color: grey; 
+    margin-bottom: 0.2rem; 
+}
+
+.details-item-label {
+    padding-right: 25%; 
+}
+
+.detailRow {
+    border: 2px solid black; 
+    margin-right: 0rem;
+    padding-left: 0rem; 
+    padding-right: 0rem; 
+}
+
+#details-list {
+    padding-left: 0px;
+    list-style: none;
+}
+
+.details-header{
+    font-size: 0.9rem;
+    background-color: lightblue; 
+    margin: 0rem; 
+    padding: 0rem !important; 
+    min-width: 100%;
+}
+
+#drawingCanvas {
+    border: 2px solid black; 
+    width: 100%; 
+    height: 100%;
+    padding: 0px, 0px, 0px, 0px; 
+    margin: 0px; 
+    min-width: 100%;
+    min-height: 100%;
+}
+
+.display-group {
+    padding: 0.3rem; 
+    margin: 0.3rem; 
+}
+
+.label-header {
+    justify-content: center;
+    padding-top: 0.2rem; 
+    align-self: right !important;
+}
+
+#showLineX, #showLineY {
+    padding: 0.3rem; 
+}
+
+
+.page-header {
+    padding: 1.2rem, 1.2rem, 1.1rem, 1.2rem; 
+    margin: 1.2rem; 
+}
+
+.buttonGroup {
+    padding: 10%, 10%, 10%, 10%; 
+    margin: 1rem; 
+}
+
+.row {
+    /*border: 2px solid black;*/ 
+}
+
+.col, .col-4, .col-8, .col-2 {
+    border: 1px dotted green; 
+}
+
+.btn-group{
+    width:100%; 
+    height: 100%; 
+}
+
+.canvasRow {
+    height: 100%;
+    border-bottom: 0.6rem solid black; 
+    padding-bottom: 1.3rem; 
+}
+
+.finishButton {
+    padding-left: 70%; 
+    padding-right: 0px; 
+    margin: 2rem; 
+}
+
+footer {
+    /*border: 2px dotted red;*/ 
+    background-color: grey;
+    min-width: 100%;
+    min-height: 100%; 
+    border-top: 0.1rem solid black; 
+}
+
+.container-fluid {
+    padding-right: 0% !important; 
+    padding-left: 0% !important; 
+}
+
+.navbar {
+    min-width: 100%;
+}
+
+.nav-item {
+    margin-right: 20px;
+}
