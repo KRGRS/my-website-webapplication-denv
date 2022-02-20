@@ -1,17 +1,19 @@
-import React, { Component, createRef, useRef } from 'react';
+import React, { Component } from 'react';
 import Canvas from './canvas';
 
 //classes 
 class Shape {
     constructor(p, sty) {
         this.points = [];
-        if (Array.isArray(p)) {
+        /*if (Array.isArray(p)) {
             p.forEach((item) => {
                 this.points.push(item);
             })
         } else {
             this.points.push(p);
-        }
+        }*/ 
+
+        this.points.push(p); 
 
         this.style = sty;
         this.detailPanelInputs = [];
@@ -38,6 +40,8 @@ class Shape {
         ctx.moveTo(this.points[0][0], this.points[0][1]);
         ctx.arc(this.points[0][0], this.points[0][1], 2, 0, 2 * Math.PI);
         ctx.fillText('0', this.points[0][0], this.points[0][1]);
+
+        ctx.stroke(); 
 
         for (let i = 1; i < this.points.length; i += 1) {
             let point2 = this.points[i];
@@ -304,8 +308,6 @@ class Grid {
     drawWoodenFrame(ctx) {
         ctx.fillStyle = "rgba(238,232,170, 1)";
         ctx.fillRect(0, 0, this.woodWidth, this.woodHeight);
-
-        ctx.fillRect(50, 50, 10, 10);
     }
 
     scaleGrid() {
@@ -384,7 +386,12 @@ class Grid {
 class Rectangle extends Shape {
     constructor(p, sty) {
         super(p, sty);
+        this.middlePoint = undefined; 
+        this.rotationAngle = 0; 
+        this.lines = undefined; 
+    }
 
+    finish() {
         this.middlePoint = this.calculateMiddlePoint();
         this.lines = this.calculateLineLength();
         this.rotationAngle = this.calculateRotation();
@@ -394,8 +401,8 @@ class Rectangle extends Shape {
         let hp = this.middlePoint;
         hp[0] += this.lines[0] / 2;
 
-        let v1 = this.calculateVector(hp, this.middlePoint);
-        let v2 = this.calculateVector(this.points[0], this.middlePoint);
+        let v1 = calculateVector(hp, this.middlePoint);
+        let v2 = calculateVector(this.points[0], this.middlePoint);
 
         return this.calcAngleBVector(v1, v2);
     }
@@ -403,10 +410,10 @@ class Rectangle extends Shape {
     calculateLineLength() {
         let lines = [];
 
-        lines.push(this.calcVectorLength(this.calculateVector(this.points[0], this.points[1])));
-        lines.push(this.calcVectorLength(this.calculateVector(this.points[1], this.points[2])));
-        lines.push(this.calcVectorLength(this.calculateVector(this.points[2], this.points[3])));
-        lines.push(this.calcVectorLength(this.calculateVector(this.points[3], this.points[0])));
+        lines.push(calcVectorLength(calculateVector(this.points[0], this.points[1])));
+        lines.push(calcVectorLength(calculateVector(this.points[1], this.points[2])));
+        lines.push(calcVectorLength(calculateVector(this.points[2], this.points[3])));
+        lines.push(calcVectorLength(calculateVector(this.points[3], this.points[0])));
 
         return lines;
     }
@@ -425,13 +432,13 @@ class Rectangle extends Shape {
     }
 
     calculateMiddlePoint() {
-        let v1 = this.calculateVector(this.points[3], this.points[1]);
-        let v2 = this.calculateVector(this.points[2], this.points[0]);
+        let v1 = calculateVector(this.points[3], this.points[1]);
+        let v2 = calculateVector(this.points[2], this.points[0]);
 
         let p1 = [this.points[0][0] + v2[0], this.points[0][1] + v2[1]];
         let p2 = [this.points[1][0] + v1[0], this.points[1][1] + v1[1]];
 
-        if (p1[0] == p2[0] && p1[1] == p2[1]) {
+        if (p1[0] === p2[0] && p1[1] === p2[1]) {
             this.middlePoint = p1;
         } else {
             alert("Something is not right");
@@ -443,13 +450,18 @@ class Rectangle extends Shape {
 
 class CanvasProvider {
 
-    constructor() {
+    constructor(reactComp) {
+
+        //react Component 
+        this.reactComponent = reactComp;
+
         //canvas Values 
         this.canvHeight = 0;
         this.canvWidth = 0;
 
         //details Panvas list 
         this.detailsPanvasList = [];
+        this.detailsPanvasListReact = (<div><p>No element is selected</p></div>);
 
         //button values
         this.xRowLinesScale = 0;
@@ -496,9 +508,7 @@ class CanvasProvider {
     }
 
     init() {
-
         //initialize all variables 
-
         this.canv = document.getElementById('drawingCanvas');
 
         if (this.canv === undefined) {
@@ -568,7 +578,6 @@ class CanvasProvider {
 
             this.mouseX = pos[0];
             this.mouseY = pos[1];
-            console.log(pos);
 
         })
 
@@ -577,8 +586,6 @@ class CanvasProvider {
 
         //this.interval = setInterval(this.draw, 100);
     }
-
-    //functions
 
     printHelloStatement() {
         console.log("Hellolololololololololololololo");
@@ -609,7 +616,8 @@ class CanvasProvider {
                 this.inDrawingConfiguration = false;
                 this.drawingInterval = undefined;
 
-                this.create_details_panel_elems(circle);
+                this.detailsPanvasListReact = this.create_details_panel_elems(circle);
+                this.reactComponent.forceUpdate();
                 clearInterval(this.drawingInterval);
             } else {
                 this.inDrawingConfObj.setNewPoints([this.mouseX, this.mouseY]);
@@ -622,8 +630,11 @@ class CanvasProvider {
             if (this.drawingPoints.length === 4) {
                 this.drawingLoopStop = true;
 
-                let rect = new Rectangle(this.drawingPoints, this.standartStyle);
-                this.objOnCanvas.push(rect);
+                this.inDrawingConfObj.finish();
+                this.objOnCanvas.push(this.inDrawingConfObj);
+
+                this.detailsPanvasListReact = this.create_details_panel_elems(this.inDrawingConfObj);
+                this.reactComponent.forceUpdate();
 
                 this.temporaryObj = [];
                 this.drawingPoints = [];
@@ -633,8 +644,6 @@ class CanvasProvider {
                 this.inDrawingConfObj = undefined;
                 this.inDrawingConfiguration = false;
                 this.drawingInterval = undefined;
-
-                this.create_details_panel_elems(rect);
                 clearInterval(this.drawingInterval);
             }
         }
@@ -647,169 +656,90 @@ class CanvasProvider {
     }
 
     create_elem_adj(elem, cls, value, id) {
-        var el = document.createElement(elem);
-
-        if (cls != undefined) {
-            el.classList.add(cls);
-        }
-
-        if (value != undefined) {
-            if (elem == 'label') {
-                el.innerHTML = value;
-            } else {
-                el.value = value;
-            }
-        }
-
-        if (id != undefined) {
-            el.id = id;
-        }
-
-        return el;
+        /* var el = document.createElement(elem);
+ 
+         if (cls != undefined) {
+             el.classList.add(cls);
+         }
+ 
+         if (value != undefined) {
+             if (elem == 'label') {
+                 el.innerHTML = value;
+             } else {
+                 el.value = value;
+             }
+         }
+ 
+         if (id != undefined) {
+             el.id = id;
+         }
+ 
+         return el;*/
     }
 
     create_input_elem(type, defV) {
-        var el = document.createElement('input');
+        /*var el = document.createElement('input');
         el.type = type;
 
         el.value = defV;
-        return el;
+        return el;*/
     }
 
     create_details_panel_elems(elem) {
-        /*
-        while (detailsPanvasList.firstChild) {
-            detailsPanvasList.removeChild(detailsPanvasList.lastChild);
-        }
- 
-        objOnCanvas.forEach((elem) => {
-            elem.style = standartStyle;
-        })
- 
-        elem.style = selectedStyle;
- 
-        switch (type) {
-            case 'circle':
-                var tts = elem.returnDetails();
-                var detailsElem = [];
- 
-                for (let i = 1; i < tts.length; i++) {
-                    var div = create_elem_adj('div', 'detailsListItem', undefined, undefined);
-                    var list = create_elem_adj('li', undefined, undefined, undefined);
- 
-                    if (i > tts[0]) {
-                        var label = create_elem_adj('label', 'details-item-label', tts[i][1], undefined);
-                        var inp = create_input_elem('number', tts[i][0]);
- 
-                        elem.addDetailListeners(inp);
- 
-                        inp.addEventListener("input", elem.changeAttributes);
-                        inp.setAttribute("step", 0.1);
- 
-                        div.appendChild(label);
-                        div.appendChild(inp);
-                    } else {
-                        for (let j = 0; j < 2; j++) {
-                            var label = create_elem_adj('label', 'details-item-label', j == 0 ? 'Point x:' : 'Point Y:', undefined);
-                            var inp = create_input_elem('number', tts[i][j]);
-                            inp.setAttribute("step", 0.1);
-                            elem.addDetailListeners(inp);
-                            inp.addEventListener("input", elem.changeAttributes);
-                            var lb = create_elem_adj('br', undefined, undefined, undefined);
- 
-                            div.appendChild(label);
-                            div.appendChild(inp);
-                            div.appendChild(lb);
-                        }
-                    }
- 
-                    list.appendChild(div);
-                    detailsElem.push(list);
-                }
- 
-                detailsElem.forEach((item) => {
-                    detailsPanvasList.appendChild(item);
-                })
-                break;
- 
-            case 'line':
-                var tts = elem.returnDetails();
-                var detailsElem = [];
- 
-                console.log(tts);
- 
-                for (let i = 0; i < tts.length; i++) {
-                    var div = create_elem_adj('div', 'detailsListItem', undefined, undefined);
-                    var list = create_elem_adj('li', undefined, undefined, undefined);
- 
-                    for (let j = 0; j < 2; j++) {
-                        var label = create_elem_adj('label', 'details-item-label', j == 0 ? 'Point x:' + i : 'Point Y:' + i, undefined);
-                        var inp = create_input_elem('number', tts[i][j]);
-                        inp.setAttribute("step", 0.1);
-                        elem.addDetailListeners(inp);
-                        inp.addEventListener("input", elem.changeAttributes);
-                        var lb = create_elem_adj('br', undefined, undefined, undefined);
- 
-                        div.appendChild(label);
-                        div.appendChild(inp);
-                        div.appendChild(lb);
-                    }
- 
-                    list.appendChild(div);
-                    detailsElem.push(list);
-                }
- 
-                detailsElem.forEach((item) => {
-                    detailsPanvasList.appendChild(item);
-                })
- 
-                break;
- 
-            case 'rectangle':
-            case 'circle':
-                var tts = elem.returnDetails();
-                var detailsElem = [];
- 
-                for (let i = 1; i < tts.length; i++) {
-                    var div = create_elem_adj('div', 'detailsListItem', undefined, undefined);
-                    var list = create_elem_adj('li', undefined, undefined, undefined);
- 
-                    if (i > tts[0]) {
-                        var label = create_elem_adj('label', 'details-item-label', tts[i][1], undefined);
-                        var inp = create_input_elem('number', tts[i][0]);
- 
-                        elem.addDetailListeners(inp);
- 
-                        inp.addEventListener("input", elem.changeAttributes);
-                        inp.setAttribute("step", 0.1);
- 
-                        div.appendChild(label);
-                        div.appendChild(inp);
-                    } else {
-                        for (let j = 0; j < 2; j++) {
-                            var label = create_elem_adj('label', 'details-item-label', j == 0 ? 'Point x:' : 'Point Y:', undefined);
-                            var inp = create_input_elem('number', tts[i][j]);
-                            inp.setAttribute("step", 0.1);
-                            elem.addDetailListeners(inp);
-                            inp.addEventListener("input", elem.changeAttributes);
-                            var lb = create_elem_adj('br', undefined, undefined, undefined);
- 
-                            div.appendChild(label);
-                            div.appendChild(inp);
-                            div.appendChild(lb);
-                        }
-                    }
- 
-                    list.appendChild(div);
-                    detailsElem.push(list);
-                }
- 
-                detailsElem.forEach((item) => {
-                    detailsPanvasList.appendChild(item);
-                })
-                break;
- 
-        }*/
+        return (<div className="detailsList">
+            {this.type === 'circle' ?
+                <div>
+                    <div className="details-list-item">
+                        <label className="details-item-label">RadPoint</label>
+                        <br></br>
+                        <label className="details-item-label"> Point X: </label>
+                        <input type="number" defaultValue={elem.radPoint.x}></input>
+                        <br></br>
+                        <label className="details-item-label"> Point Y: </label>
+                        <input type="number" defaultValue={elem.radPoint.y}></input>
+                    </div>
+                    {elem.points.forEach((item, ind) => {
+                        return (<div className="details-list-item">
+                            <label className="details-item-label">Point {ind}</label>
+                            <br></br>
+                            <label className="details-item-label"> Point X: </label>
+                            <input type="number" defaultValue={item.x}></input>
+                            <br></br>
+                            <label className="details-item-label"> Point Y: </label>
+                            <input type="number" defaultValue={item.y}></input>
+                        </div>);
+                    })}
+
+                    <div className="details-list-item">
+                        <label className="details-item-label">Count of Points: </label>
+                        <br></br>
+                        <label className="details-item-label"> Number: </label>
+                        <input type="number" defaultValue={elem.countOfPoints}></input>
+                    </div>
+
+                    <div className="details-list-item">
+                        <label className="details-item-label">Rotation Angle: </label>
+                        <br></br>
+                        <label className="details-item-label"> Angle in degrees: </label>
+                        <input type="number" defaultValue={elem.rotationAngle}></input>
+                    </div>
+
+                </div> :
+
+                <div>
+                    {elem.points.forEach((item, ind) => {
+                        return (<div className="details-list-item">
+                            <label className="details-item-label">Point {ind}</label>
+                            <br></br>
+                            <label className="details-item-label"> Point X: </label>
+                            <input type="number" defaultValue={item.x}></input>
+                            <br></br>
+                            <label className="details-item-label"> Point Y: </label>
+                            <input type="number" defaultValue={item.y}></input>
+                        </div>);
+                    })}
+                </div>}
+        </div>)
     }
 
     selectLine() {
@@ -832,7 +762,7 @@ class CanvasProvider {
             ctx.fillStyle = "rgba(255, 255, 255, 1)";
             ctx.fillRect(0, 0, this.canvWidth, this.canvHeight);
             this.objOnCanvas.forEach((item) => {
-                item.draw(ctx);
+               // item.draw(ctx);
             })
 
             this.temporaryObj.forEach((item) => {
@@ -901,7 +831,7 @@ class CanvasProvider {
                         this.inDrawingConfObj = new Rectangle(this.drawingPoints[0], this.standartStyle);
                         this.temporaryObj.push(this.inDrawingConfObj);
 
-                        this.drawingInterval = setInterval(this.inRectangleConfiguration, 100);
+                        this.drawingInterval = setInterval(this.inRectangleConfiguration.bind(this), 100);
                         this.drawingLoopStop = false;
                         break;
 
@@ -932,10 +862,9 @@ class CanvasProvider {
 
 class CncFrame extends Component {
 
-
     constructor() {
         super();
-        this.canvProvider = new CanvasProvider();
+        this.canvProvider = new CanvasProvider(this);
     }
 
     printHelloStatement() {
@@ -1000,8 +929,8 @@ class CncFrame extends Component {
                             <div className="btn-group">
                                 <button type="button" className="btn btn-primary" onClick={this.canvProvider.selectCicrle.bind(this.canvProvider)}>Circle</button>
                                 <button type="button" className="btn btn-primary" onClick={this.printHelloStatement}>Triangle</button>
-                                <button type="button" className="btn btn-primary" onClick={this.canvProvider.selectRectangle}>Rectangle</button>
-                                <button type="button" className="btn btn-primary" onClick={this.canvProvider.selectLine}>Line</button>
+                                <button type="button" className="btn btn-primary" onClick={this.canvProvider.selectRectangle.bind(this.canvProvider)}>Rectangle</button>
+                                <button type="button" className="btn btn-primary" onClick={this.canvProvider.selectLine.bind(this.canvProvider)}>Line</button>
                             </div>
                         </div>
                         <div className="col-2">
@@ -1014,6 +943,7 @@ class CncFrame extends Component {
                         <div className="col-4 detailRow">
                             <h3 className="details-header">Details:</h3>
                             <ul id="details-list">
+                                {this.canvProvider.detailsPanvasListReact}
                             </ul>
                         </div>
                         <div className="col" id="drawingCanvasDiv">

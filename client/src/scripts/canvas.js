@@ -1,4 +1,4 @@
-import { Component, useRef} from 'react';
+import {useRef} from 'react';
 import * as React from 'react';
 
 const Canvas = (props) => {
