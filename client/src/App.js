@@ -1,18 +1,19 @@
-import React, {Component} from 'react'; 
-import Navbar from './scripts/header'; 
+import React, { Component } from 'react';
 import CncFrame from './scripts/cncFrame';
 import PageHeader from './scripts/pageHeader.js';
 import './css/style.css';
+import MyNavbar from './scripts/Navbar';
 
 class App extends Component {
-  constructor(props){
-    super(props); 
-
-  }
-
-  render(){
-    return (<div> <PageHeader /><Navbar /><CncFrame />
-    </div>); 
+  render() {
+    return (<div> 
+      {/*<Helmet>
+        <script src="./scripts/javasc.js" type="text/javascript"></script>
+      </Helmet>*/}
+      <PageHeader />
+       <MyNavbar />
+      <CncFrame />
+    </div>);
   }
 }
 
