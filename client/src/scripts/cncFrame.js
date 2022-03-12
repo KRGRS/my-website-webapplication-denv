@@ -11,9 +11,9 @@ class Shape {
             })
         } else {
             this.points.push(p);
-        }*/ 
+        }*/
 
-        this.points.push(p); 
+        this.points.push(p);
 
         this.style = sty;
         this.detailPanelInputs = [];
@@ -41,7 +41,7 @@ class Shape {
         ctx.arc(this.points[0][0], this.points[0][1], 2, 0, 2 * Math.PI);
         ctx.fillText('0', this.points[0][0], this.points[0][1]);
 
-        ctx.stroke(); 
+        ctx.stroke();
 
         for (let i = 1; i < this.points.length; i += 1) {
             let point2 = this.points[i];
@@ -99,24 +99,26 @@ class Circle {
         this.detailPanelInputs = [];
 
         this.changeAttributes = () => {
-            this.xTranslation = parseInt(this.detailPanelInputs[0].value);
+            /*this.xTranslation = parseInt(this.detailPanelInputs[0].value);
             this.yTranslation = parseInt(this.detailPanelInputs[1].value);
             this.rotationAngle = parseInt(this.detailPanelInputs[2].value);
             this.countOfPoints = parseInt(this.detailPanelInputs[3].value);
-            this.radius = parseInt(this.detailPanelInputs[4].value);
+            this.radius = parseInt(this.detailPanelInputs[4].value);*/
 
-            this.changeCoords();
             this.changeRadiusOfCircle();
             this.rotateCrucialPoint();
             this.configurePoints();
 
-            if (this.points[0] == this.points[1]) {
+            if (this.points[0] === this.points[1]) {
                 this.points = [this.points[0]];
                 this.configurePoints();
             }
         };
     }
 
+    /**
+     * function is out of use
+     */
     changeCoords() {
 
         if (!this.radPoint[0] < this.xTranslation) {
@@ -144,7 +146,7 @@ class Circle {
         let vectorRP = calculateVector(this.points[0], this.radPoint);
 
         this.radius = isNaN(this.radius) ? 0.3 : this.radius;
-        let quot = this.radius / this.calcVectorLength(vectorRP);
+        let quot = this.radius / calcVectorLength(vectorRP);
 
         if (!isFinite(quot) || isNaN(quot)) {
             quot = 0.3;
@@ -191,7 +193,9 @@ class Circle {
         this.vectorUR = calculateVector(this.radPoint, [0, 0]);
         this.vectorRP = calculateVector(this.points[0], this.radPoint);
 
-        for (let i = angle; i < 360; i += angle) {
+        this.points = [];
+
+        for (let i = angle; i <= 360; i += angle) {
 
             point[0] = this.vectorRP[0];
             point[1] = this.vectorRP[1];
@@ -386,9 +390,44 @@ class Grid {
 class Rectangle extends Shape {
     constructor(p, sty) {
         super(p, sty);
-        this.middlePoint = undefined; 
-        this.rotationAngle = 0; 
-        this.lines = undefined; 
+        this.middlePoint = [];
+        this.rotationAngle = 0;
+        this.lines = undefined;
+        this.cogP = [];
+    }
+
+    draw(ctx) {
+        ctx.fillStyle = this.style;
+
+        ctx.beginPath();
+        ctx.arc(this.middlePoint[0], this.middlePoint[1], 2, 0, 2 * Math.PI);
+        ctx.stroke();
+
+        ctx.moveTo(this.points[0][0], this.points[0][1]);
+        ctx.arc(this.points[0][0], this.points[0][1], 2, 0, 2 * Math.PI);
+        ctx.fillText('0', this.points[0][0], this.points[0][1]);
+
+
+        for (let i = 1; i < this.points.length; i++) {
+            let point2 = this.points[i];
+
+            ctx.arc(point2[0], point2[1], 2, 0, 2 * Math.PI);
+
+            ctx.lineTo(point2[0], point2[1]);
+
+            ctx.fillText(i, point2[0], point2[1]);
+        }
+
+        ctx.closePath();
+        ctx.stroke();
+
+        ctx.fillStyle = 'rgba(0, 255, 0, 1)';
+        this.cogP.forEach((item, ind) => {
+            ctx.beginPath();
+            ctx.arc(item[0], item[1], 1, 0, 2 * Math.PI);
+            ctx.fillText("S" + (ind + 1), item[0], item[1]);
+            ctx.stroke();
+        })
     }
 
     finish() {
@@ -404,7 +443,9 @@ class Rectangle extends Shape {
         let v1 = calculateVector(hp, this.middlePoint);
         let v2 = calculateVector(this.points[0], this.middlePoint);
 
-        return this.calcAngleBVector(v1, v2);
+        let rot = calcAngleBVector(v1, v2);
+
+        return isNaN(rot) ? 0 : rot;
     }
 
     calculateLineLength() {
@@ -431,19 +472,118 @@ class Rectangle extends Shape {
         return details;
     }
 
-    calculateMiddlePoint() {
-        let v1 = calculateVector(this.points[3], this.points[1]);
-        let v2 = calculateVector(this.points[2], this.points[0]);
+    print(arg) {
+        arg.forEach((item) => {
+            console.log(item);
+        })
 
-        let p1 = [this.points[0][0] + v2[0], this.points[0][1] + v2[1]];
-        let p2 = [this.points[1][0] + v1[0], this.points[1][1] + v1[1]];
-
-        if (p1[0] === p2[0] && p1[1] === p2[1]) {
-            this.middlePoint = p1;
-        } else {
-            alert("Something is not right");
-        }
+        console.log("'''");
     }
+
+    calculateCentroidOfTriangle(t) {
+
+        let s1 = calculateVector(t[0], t[1]);
+        let s2 = calculateVector(t[1], t[2]);
+        let s3 = calculateVector(t[2], t[0]);
+
+
+        let mid1 = [t[1][0] + s1[0] / 2, t[1][1] + s1[1] / 2];
+        let mid2 = [t[2][0] + s2[0] / 2, t[2][1] + s2[1] / 2];
+        let mid3 = [t[0][0] + s3[0] / 2, t[0][1] + s3[1] / 2];
+
+
+        let d1 = calculateVector(t[2], mid1);
+        let d2 = calculateVector(t[0], mid2);
+        let d3 = calculateVector(t[1], mid3);
+
+
+        let p1 = [(mid1[0] + d1[0] / 3), (mid1[1] + d1[1] / 3)];
+        let p2 = [(mid2[0] + d2[0] / 3), (mid2[1] + d2[1] / 3)];
+        let p3 = [(mid3[0] + d3[0] / 3), (mid3[1] + d3[1] / 3)];
+
+        return p1;
+    }
+
+    calculateMiddlePoint() {
+        //diagonal from p0 to p2 
+        let triangle1 = [this.points[0], this.points[1], this.points[2]];
+        let triangle2 = [this.points[0], this.points[2], this.points[3]];
+
+        //diagonal from p1 to p3 
+        let triangle3 = [this.points[0], this.points[1], this.points[3]];
+        let triangle4 = [this.points[1], this.points[2], this.points[3]];
+
+        //calculate cog for first two triangles
+        let s1 = this.calculateCentroidOfTriangle(triangle1);
+        let s2 = this.calculateCentroidOfTriangle(triangle2);
+
+        this.cogP.push(s1, s2);
+
+        //calculate cog for second two triangles
+        let s3 = this.calculateCentroidOfTriangle(triangle3);
+        let s4 = this.calculateCentroidOfTriangle(triangle4);
+
+        this.cogP.push(s3, s4);
+
+        let midP = this.checkLineIntersection(s1[0], s1[1], s2[0], s2[1], s3[0], s3[1], s4[0], s4[1]);
+
+        let middlePoint = [midP.x, midP.y];
+
+        return middlePoint;
+    }
+
+    /**
+     * 
+     * @param {*} line1StartX 
+     * @param {*} line1StartY 
+     * @param {*} line1EndX 
+     * @param {*} line1EndY 
+     * @param {*} line2StartX 
+     * @param {*} line2StartY 
+     * @param {*} line2EndX 
+     * @param {*} line2EndY 
+     * @returns Object with values of x and y and the booleans onLine1 and onLine2
+     */
+
+    checkLineIntersection(line1StartX, line1StartY, line1EndX, line1EndY, line2StartX, line2StartY, line2EndX, line2EndY) {
+        // if the lines intersect, the result contains the x and y of the intersection (treating the lines as infinite) and booleans for whether line segment 1 or line segment 2 contain the point
+        var denominator, a, b, numerator1, numerator2, result = {
+            x: null,
+            y: null,
+            onLine1: false,
+            onLine2: false
+        };
+        denominator = ((line2EndY - line2StartY) * (line1EndX - line1StartX)) - ((line2EndX - line2StartX) * (line1EndY - line1StartY));
+        if (denominator === 0) {
+            return result;
+        }
+        a = line1StartY - line2StartY;
+        b = line1StartX - line2StartX;
+        numerator1 = ((line2EndX - line2StartX) * a) - ((line2EndY - line2StartY) * b);
+        numerator2 = ((line1EndX - line1StartX) * a) - ((line1EndY - line1StartY) * b);
+        a = numerator1 / denominator;
+        b = numerator2 / denominator;
+
+        // if we cast these lines infinitely in both directions, they intersect here:
+        result.x = line1StartX + (a * (line1EndX - line1StartX));
+        result.y = line1StartY + (a * (line1EndY - line1StartY));
+        /*
+                // it is worth noting that this should be the same as:
+                x = line2StartX + (b * (line2EndX - line2StartX));
+                y = line2StartX + (b * (line2EndY - line2StartY));
+                */
+        // if line1 is a segment and line2 is infinite, they intersect if:
+        if (a > 0 && a < 1) {
+            result.onLine1 = true;
+        }
+        // if line2 is a segment and line1 is infinite, they intersect if:
+        if (b > 0 && b < 1) {
+            result.onLine2 = true;
+        }
+        // if line1 and line2 are segments, they intersect if both of the above are true
+        return result;
+    };
+
 
 }
 
@@ -494,8 +634,8 @@ class CanvasProvider {
         this.countOfPoints = 0;
         this.type = undefined;
         this.points = [];
-        this.scaleX = 0;
-        this.scaleY = 0;
+        this.scaleX = 0.5;
+        this.scaleY = 0.5;
         this.mouseX = 0;
         this.mouseY = 0;
         this.drawXLines = true;
@@ -517,6 +657,7 @@ class CanvasProvider {
 
         this.ctx = this.canv.getContext('2d');
         this.ctx.font = '18px serif';
+        this.ctx.scale(this.scaleX, this.scaleY);
 
         this.detailsPanvasList = document.getElementById("details-list");
         this.xRowLinesScale = document.getElementById("xLineInput");
@@ -576,8 +717,8 @@ class CanvasProvider {
             let pos = this.getMousePosition(e);
 
 
-            this.mouseX = pos[0];
-            this.mouseY = pos[1];
+            this.mouseX = pos[0] * (1 / this.scaleX);
+            this.mouseY = pos[1] * (1 / this.scaleY);
 
         })
 
@@ -644,6 +785,7 @@ class CanvasProvider {
                 this.inDrawingConfObj = undefined;
                 this.inDrawingConfiguration = false;
                 this.drawingInterval = undefined;
+
                 clearInterval(this.drawingInterval);
             }
         }
@@ -685,61 +827,153 @@ class CanvasProvider {
         return el;*/
     }
 
+    /**
+     * change Attributes for circle objects 
+     * @param {Circle} obj reference to the object which has to change 
+     * @param {Number} value the new value for the attribute
+     * @param {Number} index index of coordinates to change (0 = X, 1 = Y)
+     * @param {Number} type -1 = radPoint; 0 < index of Point 
+     */
+    changeAttributesOfCircles(obj, value, index, type) {
+        if (type === -1) {
+            obj.radPoint[index] = parseInt(value);
+        } else {
+            obj.points[type][index] = parseInt(value);
+        }
+        obj.changeAttributes();
+    }
+
+    changeAttributesOfLine() {
+
+    }
+
+    /** 
+     * render details in correspondance to type 
+     * @param {String} param type as already multiple defined in lowercase letters 
+     * @param {} elem obj which values are to show 
+     * 
+    */
+    renderSwitch(param, elem) {
+
+        console.log(elem);
+        //console.log(param); 
+
+        switch (param) {
+            case 'circle': return (
+                <div className="detailsList">
+                    <div>
+                        <div className="details-list-item">
+                            <label className="details-item-label-top">RadPoint</label>
+                            <br></br>
+                            <label className="details-item-label"> Point X: </label>
+                            <input type="number" defaultValue={elem.radPoint[0]} onChange={(e) => this.changeAttributesOfCircles(elem, e.target.value, 0, -1)}></input>
+                            <br></br>
+                            <label className="details-item-label"> Point Y: </label>
+                            <input type="number" defaultValue={elem.radPoint[1]} onChange={(e) => this.changeAttributesOfCircles(elem, e.target.value, 1, -1)}></input>
+                        </div>
+                        {elem.points.map((item, ind) => {
+                            return (<div className="details-list-item">
+                                <label className="details-item-label-top">Point {ind}</label>
+                                <br></br>
+                                <label className="details-item-label"> Point X: </label>
+                                <input type="number" defaultValue={item[0]} readOnly></input>
+                                <br></br>
+                                <label className="details-item-label"> Point Y: </label>
+                                <input type="number" defaultValue={item[1]} readOnly></input>
+                            </div>);
+                        })}
+
+                        <div className="details-list-item">
+                            <label className="details-item-label-top">Count of Points: </label>
+                            <br></br>
+                            <label className="details-item-label"> Number: </label>
+                            <input type="number" defaultValue={elem.countOfPoints}></input>
+                        </div>
+
+                        <div className="details-list-item">
+                            <label className="details-item-label-top">Rotation Angle: </label>
+                            <br></br>
+                            <label className="details-item-label"> Angle in degrees: </label>
+                            <input type="number" defaultValue={elem.rotationAngle}></input>
+                        </div>
+
+                    </div>
+                </div>);
+
+            case 'line':
+
+                return (
+                    <div className="detailsList">
+                        <div>
+                            {elem.points.map((item, ind) => {
+                                return (<div className="details-list-item">
+                                    <label className="details-item-label-top">Point {ind}</label>
+                                    <br></br>
+                                    <label className="details-item-label"> Point X: </label>
+                                    <input type="number" defaultValue={item[0]}></input>
+                                    <br></br>
+                                    <label className="details-item-label"> Point Y: </label>
+                                    <input type="number" defaultValue={item[1]}></input>
+                                </div>);
+                            })}
+                        </div>
+                    </div>)
+
+            case 'rectangle':
+
+                return (
+                    <div className="detailsList">
+                        <div>
+                            <div className="details-list-item">
+                                <label className="details-item-label-top">Middle Point:</label>
+                                <br></br>
+                                <label className="details-item-label"> Point X: </label>
+                                <input type="number" defaultValue={elem.middlePoint[0]}></input>
+                                <br></br>
+                                <label className="details-item-label"> Point Y: </label>
+                                <input type="number" defaultValue={elem.middlePoint[1]}></input>
+                            </div>
+
+
+                            {elem.points.map((item, ind) => {
+                                return (
+                                    <div className="details-list-item" key={ind}>
+                                        <label className="details-item-label-top">Point {ind}:</label>
+                                        <br></br>
+                                        <label className="details-item-label"> Point X: </label>
+                                        <input type="number" defaultValue={item[0]}></input>
+                                        <br></br>
+                                        <label className="details-item-label"> Point Y: </label>
+                                        <input type="number" defaultValue={item[1]}></input>
+                                    </div>
+                                );
+                            })}
+
+                            {elem.lines.map((item, ind) => {
+                                return (
+                                    <div className="details-list-item" key={ind}>
+                                        <label className="details-item-label-top">Line {ind}: </label>
+                                        <br></br>
+                                        <label className="details-item-label"> Length </label>
+                                        <input type="number" defaultValue={item}></input>
+                                        <br></br>
+                                    </div>
+                                );
+                            })}
+                            <div className="details-list-item">
+                                <label className="details-item-label-top"> Rotation (in degrees): </label>
+                                <input type="number" defaultValue={elem.rotationAngle}></input>
+                            </div>
+                        </div>
+                    </div>);
+
+            default:
+                return (<div><p>No object is selected</p></div>);
+        }
+    }
+
     create_details_panel_elems(elem) {
-        return (<div className="detailsList">
-            {this.type === 'circle' ?
-                <div>
-                    <div className="details-list-item">
-                        <label className="details-item-label">RadPoint</label>
-                        <br></br>
-                        <label className="details-item-label"> Point X: </label>
-                        <input type="number" defaultValue={elem.radPoint.x}></input>
-                        <br></br>
-                        <label className="details-item-label"> Point Y: </label>
-                        <input type="number" defaultValue={elem.radPoint.y}></input>
-                    </div>
-                    {elem.points.forEach((item, ind) => {
-                        return (<div className="details-list-item">
-                            <label className="details-item-label">Point {ind}</label>
-                            <br></br>
-                            <label className="details-item-label"> Point X: </label>
-                            <input type="number" defaultValue={item.x}></input>
-                            <br></br>
-                            <label className="details-item-label"> Point Y: </label>
-                            <input type="number" defaultValue={item.y}></input>
-                        </div>);
-                    })}
-
-                    <div className="details-list-item">
-                        <label className="details-item-label">Count of Points: </label>
-                        <br></br>
-                        <label className="details-item-label"> Number: </label>
-                        <input type="number" defaultValue={elem.countOfPoints}></input>
-                    </div>
-
-                    <div className="details-list-item">
-                        <label className="details-item-label">Rotation Angle: </label>
-                        <br></br>
-                        <label className="details-item-label"> Angle in degrees: </label>
-                        <input type="number" defaultValue={elem.rotationAngle}></input>
-                    </div>
-
-                </div> :
-
-                <div>
-                    {elem.points.forEach((item, ind) => {
-                        return (<div className="details-list-item">
-                            <label className="details-item-label">Point {ind}</label>
-                            <br></br>
-                            <label className="details-item-label"> Point X: </label>
-                            <input type="number" defaultValue={item.x}></input>
-                            <br></br>
-                            <label className="details-item-label"> Point Y: </label>
-                            <input type="number" defaultValue={item.y}></input>
-                        </div>);
-                    })}
-                </div>}
-        </div>)
+        return (this.renderSwitch(this.type, elem));
     }
 
     selectLine() {
@@ -762,7 +996,7 @@ class CanvasProvider {
             ctx.fillStyle = "rgba(255, 255, 255, 1)";
             ctx.fillRect(0, 0, this.canvWidth, this.canvHeight);
             this.objOnCanvas.forEach((item) => {
-               // item.draw(ctx);
+                item.draw(ctx);
             })
 
             this.temporaryObj.forEach((item) => {
@@ -836,7 +1070,7 @@ class CanvasProvider {
                         break;
 
                     default:
-                        console.log("Hello World");
+                        //console.log("Hello World");
                         break;
                 }
 
@@ -852,7 +1086,7 @@ class CanvasProvider {
                         break;
 
                     default:
-                        console.log("Hello world2!");
+                    //console.log("Hello world2!");
                 }
             }
         }
@@ -865,6 +1099,11 @@ class CncFrame extends Component {
     constructor() {
         super();
         this.canvProvider = new CanvasProvider(this);
+        this.fullScreenState = false; 
+        this.changeFullScreenState = () => {
+            this.fullScreenState? this.fullScreenState = false : this.fullScreenState = true; 
+            this.forceUpdate(); 
+        }
     }
 
     printHelloStatement() {
@@ -878,18 +1117,18 @@ class CncFrame extends Component {
     render() {
 
         return (
-            <div>
+            <div id="appFrame" className={this.fullScreenState? 'fullscreen' : ''}>
                 <div className="row">
                     <div className="col">
-                        <div>
-                            <label htmlFor="woodWidth"> Width of Wood:</label>
-                            <input type="number" min="5" id="woodWidth" />
+                        <div className='wood-div'>
+                            <label htmlFor="woodWidth" className='wood-column'> Width of Wood:</label>
+                            <input type="number" min="5" id="woodWidth" className='wood-column' />
                         </div>
                     </div>
                     <div className="col">
-                        <div>
-                            <label htmlFor="woodHeight">Height of Wood:</label>
-                            <input type="number" min="5" id="woodHeight" />
+                        <div className='wood-div'>
+                            <label htmlFor="woodHeight" className='wood-column'>Height of Wood:</label>
+                            <input type="number" min="5" id="woodHeight" className='wood-column' />
                         </div>
                     </div>
                     <div className="col">
@@ -901,7 +1140,7 @@ class CncFrame extends Component {
                         </div>
                     </div>
                     <div className="col">
-                        <div>
+                        <div className='display-group'>
                             <label className="label-display" htmlFor="yLineInput">yRow-Lines</label>
                             <input type="number" min="1" max="100" id="yLineInput" />
                             <label className="label-header" htmlFor="showLineY">Show lines? </label>
@@ -911,15 +1150,28 @@ class CncFrame extends Component {
                     </div>
 
                     <div className="row buttonGroup">
+                        <div className='col'>
+                            <button className="arrow arrow-top left-appframe-corner" onClick={this.changeFullScreenState}></button></div>
                         <div className="col">
                             <div className="btn-group">
                                 <button type="button" className="btn btn-secondary">Mirroring vertical</button>
                                 <button type="button" className="btn btn-secondary">Mirroring horizontal</button>
-                                <button type="button" className="btn btn-secondary">choose outline</button>
-                                <button type="button" className="btn btn-secondary">define cutout area</button>
-                                <button type="button" className="btn btn-secondary">repeate pattern</button>
                             </div>
                         </div>
+                        <div className='col'>
+                            <button type="button" className="btn btn-secondary">repeate pattern</button></div>
+                        <div className='col'></div>
+                    </div>
+
+                    <div className="row buttonGroup">
+                        <div className='col'></div>
+                        <div className="col">
+                            <div className="btn-group">
+                                <button type="button" className="btn btn-secondary">choose outline</button>
+                                <button type="button" className="btn btn-secondary">define cutout area</button>
+                            </div>
+                        </div>
+                        <div className="col"></div>
                     </div>
 
                     <div className="row buttonGroup">
@@ -927,10 +1179,10 @@ class CncFrame extends Component {
                         </div>
                         <div className="col-8">
                             <div className="btn-group">
-                                <button type="button" className="btn btn-primary" onClick={this.canvProvider.selectCicrle.bind(this.canvProvider)}>Circle</button>
-                                <button type="button" className="btn btn-primary" onClick={this.printHelloStatement}>Triangle</button>
-                                <button type="button" className="btn btn-primary" onClick={this.canvProvider.selectRectangle.bind(this.canvProvider)}>Rectangle</button>
-                                <button type="button" className="btn btn-primary" onClick={this.canvProvider.selectLine.bind(this.canvProvider)}>Line</button>
+                                <button type="button" className="btn btn-secondary" onClick={this.canvProvider.selectCicrle.bind(this.canvProvider)}>Circle</button>
+                                <button type="button" className="btn btn-secondary" onClick={this.printHelloStatement}>Triangle</button>
+                                <button type="button" className="btn btn-secondary" onClick={this.canvProvider.selectRectangle.bind(this.canvProvider)}>Rectangle</button>
+                                <button type="button" className="btn btn-secondary" onClick={this.canvProvider.selectLine.bind(this.canvProvider)}>Line</button>
                             </div>
                         </div>
                         <div className="col-2">
@@ -942,9 +1194,9 @@ class CncFrame extends Component {
                     <div className="row canvasRow">
                         <div className="col-4 detailRow">
                             <h3 className="details-header">Details:</h3>
-                            <ul id="details-list">
+                            <div id="details-list">
                                 {this.canvProvider.detailsPanvasListReact}
-                            </ul>
+                            </div>
                         </div>
                         <div className="col" id="drawingCanvasDiv">
                             <Canvas providerref={this.canvProvider}></Canvas>
@@ -998,7 +1250,7 @@ function calculateVector(zp, ap) {
 }
 
 function calcVectorLength(v1) {
-    return Math.sqrt(Math.pow(v1[0], 2) + Math.pow(v1[1], 1));
+    return Math.sqrt(Math.pow(v1[0], 2) + Math.pow(v1[1], 2));
 }
 
 function calculateDistance(x1, y1, x2, y2) {

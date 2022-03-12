@@ -1,31 +1,36 @@
 import 'bootstrap/dist/css/bootstrap.css';
-import { Navbar, NavDropdown, Nav, Container} from 'react-bootstrap';
+import { Navbar, NavDropdown, Nav, Container } from 'react-bootstrap';
 
-function MyNavbar(){
-        return (
-            <Navbar bg="light" className="navbar navbar-expand-sm navbar-light">
-                <Container>
-                    <Navbar.Collapse>
-                        <Nav>
-                            <NavDropdown title="Project" className="dropdown">
-                                <NavDropdown.Item href="#" className="dropdown-list">Create Project</NavDropdown.Item>
-                                <NavDropdown.Item href="#" className="dropdown-list">Open Project</NavDropdown.Item>
-                                <NavDropdown.Item href="#" className="dropdown-list">Close Project</NavDropdown.Item>
-                            </NavDropdown>
-                            <NavDropdown title="View">
-                                <NavDropdown.Item href="#" className="dropdown-list">Link1</NavDropdown.Item>
-                                <NavDropdown.Item href="#" className="dropdown-list">Link1</NavDropdown.Item>
-                                <NavDropdown.Item href="#" className="dropdown-list">Link1</NavDropdown.Item>
-                            </NavDropdown>
-                            <NavDropdown title="Extra">
-                            <NavDropdown.Item href="#" className="dropdown-list">Link1</NavDropdown.Item>
-                            <NavDropdown.Item href="#" className="dropdown-list">Link1</NavDropdown.Item>
-                            <NavDropdown.Item href="#" className="dropdown-list">Link1</NavDropdown.Item>
-                            </NavDropdown>
-
+function MyNavbar() {
+    return (
+        <Navbar bg="dark" variant="dark">
+            <Container fluid>
+                <Navbar.Brand href="#">Cnc Cutter</Navbar.Brand>
+                <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+                <Navbar.Collapse id="responsive-navbar-nav">
+                    <Nav className='ml-auto'>
+                        <NavDropdown title="Project" className="navbar-title">
+                            <NavDropdown.Item href="#" className="navbar-title">Create Project</NavDropdown.Item>
+                            <NavDropdown.Item href="#" className="navbar-title">Open Project</NavDropdown.Item>
+                            <NavDropdown.Item href="#" className="navbar-title">Close Project</NavDropdown.Item>
+                        </NavDropdown>
+                        <NavDropdown title="View">
+                            <NavDropdown.Item href="#" className="navbar-title">Link1</NavDropdown.Item>
+                            <NavDropdown.Item href="#" className="navbar-title">Link1</NavDropdown.Item>
+                            <NavDropdown.Item href="#" className="navbar-title">Link1</NavDropdown.Item>
+                        </NavDropdown>
+                        <NavDropdown title="Extra">
+                            <NavDropdown.Item href="#" className="navbar-title">Link1</NavDropdown.Item>
+                            <NavDropdown.Item href="#" className="navbar-title">Link1</NavDropdown.Item>
+                            <NavDropdown.Item href="#" className="navbar-title">Link1</NavDropdown.Item>
+                        </NavDropdown>
+                        <Nav className="ml-right">
                             <Nav.Link className="justify-content-end" href="#">User</Nav.Link>
+                        </Nav>
 
-                           {/* < ul className="navbar-nav" >
+
+
+                        {/* < ul className="navbar-nav" >
                                 <li className="nav-item">
                                     <div className="dropdown">
                                         <a type="button" className="nav-item dropdown-list" data-toggle="dropdown">
@@ -69,14 +74,14 @@ function MyNavbar(){
                                     </div>
                                 </li>
                             </ul >*/}
-                        </Nav>
-                    </Navbar.Collapse>
-                </Container>
-            </Navbar >);
+                    </Nav>
+                </Navbar.Collapse>
+            </Container>
+        </Navbar >);
 
-        /*const htmlToReactParser = new HTMLToReactParser();
-        const reactElement = htmlToReactParser.parse(HTMLElements);
-        return reactElement;*/
-    }
+    /*const htmlToReactParser = new HTMLToReactParser();
+    const reactElement = htmlToReactParser.parse(HTMLElements);
+    return reactElement;*/
+}
 
 export default MyNavbar; 
