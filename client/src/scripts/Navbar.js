@@ -32,10 +32,6 @@ function MyNavbar() {
                 </Navbar.Collapse>
             </Container>
         </Navbar >);
-
-    /*const htmlToReactParser = new HTMLToReactParser();
-    const reactElement = htmlToReactParser.parse(HTMLElements);
-    return reactElement;*/
 }
 
 export default MyNavbar; 

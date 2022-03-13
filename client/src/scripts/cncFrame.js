@@ -44,6 +44,10 @@ class Shape {
         ctx.stroke();
 
         for (let i = 1; i < this.points.length; i += 1) {
+
+            ctx.beginPath(); 
+            ctx.moveTo(this.points[i-1][0], this.points[i-1][1]); 
+
             let point2 = this.points[i];
 
             ctx.arc(point2[0], point2[1], 2, 0, 2 * Math.PI);
@@ -51,7 +55,7 @@ class Shape {
             ctx.lineTo(point2[0], point2[1]);
 
             ctx.fillText(i, point2[0], point2[1]);
-
+ 
             ctx.stroke();
         }
     }
@@ -68,10 +72,10 @@ class Line extends Shape {
         let result = [];
         for (let i = 0; i < this.points.length; i++) {
             if (i === this.points.length - 1) {
-                result.push(calcVectorLength(calculateVector(this.points[i - 1], this.points[0])));
+                result.push(calcVectorLength(calculateVector(this.points[i - 1], this.points[0])).toFixed(2));
                 break;
             }
-            result.push(calcVectorLength(calculateVector(this.points[i], this.points[i + 1])));
+            result.push(calcVectorLength(calculateVector(this.points[i], this.points[i + 1])).toFixed(2));
         }
 
         return result;
@@ -451,9 +455,11 @@ class Rectangle extends Shape {
     }
 
     finish() {
-        this.middlePoint = this.calculateMiddlePoint();
-        this.lines = this.calculateLineLength();
-        this.rotationAngle = this.calculateRotation();
+        this.middlePoint = this.calculateMiddlePoint(); 
+        this.lines = this.calculateLineLength().map((item) => {
+            return item.toFixed(2); 
+        });
+        this.rotationAngle = this.calculateRotation().toFixed(2);
     }
 
     calculateRotation() {
@@ -778,7 +784,7 @@ class CanvasProvider {
 
                 this.detailsPanvasListReact = this.create_details_panel_elems(circle);
                 this.reactComponent.forceUpdate();
-                clearInterval(this.drawingInterval);
+                this.drawingInterval = clearInterval(this.drawingInterval);
             } else {
                 this.inDrawingConfObj.setNewPoints([this.mouseX, this.mouseY]);
             }
@@ -804,7 +810,7 @@ class CanvasProvider {
                 this.inDrawingConfObj = undefined;
                 this.inDrawingConfiguration = false;
 
-                clearInterval(this.drawingInterval);
+                this.drawingInterval = clearInterval(this.drawingInterval);
             }
         }
     }
@@ -818,13 +824,15 @@ class CanvasProvider {
                 this.detailsPanvasListReact = this.create_details_panel_elems(this.inDrawingConfObj);
                 this.reactComponent.forceUpdate();
 
-                this.inDrawingConfObj = undefined;
-                this.inDrawingConfiguration = false;
-                this.countOfPoints = 0;
                 this.temporaryObj = [];
                 this.drawingPoints = [];
 
-                clearInterval(this.drawingInterval)
+                this.countOfPoints = 0;
+                this.inDrawingConfObj = undefined;
+                this.inDrawingConfiguration = false;
+                this.drawingButtonSelected = false; 
+
+                this.drawingInterval = clearInterval(this.drawingInterval)
             }
         }
     }
@@ -833,6 +841,22 @@ class CanvasProvider {
         for (var key in attrs) {
             el.setAttribute(key, attrs[key]);
         }
+    }
+
+    /**
+     * change number of points or angle of the circle (polygone) 0: number of points 1: angle  
+     * @param {Circle} obj 
+     * @param {Number} value 
+     * @param {Number} type 
+     */
+    changeSpecialAttributesOfCircles(obj, value, type){
+        if(type === 0){
+            obj.countOfPoints = value; 
+        }else{
+            obj.rotationAngle = value; 
+        }
+
+        obj.changeAttributes(); 
     }
 
     /**
@@ -895,14 +919,14 @@ class CanvasProvider {
                             <label className="details-item-label-top">Count of Points: </label>
                             <br></br>
                             <label className="details-item-label"> Number: </label>
-                            <input type="number" defaultValue={elem.countOfPoints}></input>
+                            <input type="number" defaultValue={elem.countOfPoints} onChange={(e) => this.changeSpecialAttributesOfCircles(elem, e.target.value, 0)}></input>
                         </div>
 
                         <div className="details-list-item">
                             <label className="details-item-label-top">Rotation Angle: </label>
                             <br></br>
                             <label className="details-item-label"> Angle in degrees: </label>
-                            <input type="number" defaultValue={elem.rotationAngle}></input>
+                            <input type="number" defaultValue={elem.rotationAngle} onChange={(e) => this.changeSpecialAttributesOfCircles(elem, e.target.value, 1)}></input>
                         </div>
 
                     </div>
@@ -980,6 +1004,7 @@ class CanvasProvider {
                             })}
                             <div className="details-list-item">
                                 <label className="details-item-label-top"> Rotation (in degrees): </label>
+                                <label className="details-item-label"></label>
                                 <input type="number" defaultValue={elem.rotationAngle}></input>
                             </div>
                         </div>
@@ -1199,7 +1224,9 @@ class CncFrame extends Component {
                         <div className="col-3 detailRow">
                             <h3 className="details-header">Details:</h3>
                             <div id="details-list">
+                                <div className='overflow-wrapper'>
                                 {this.canvProvider.detailsPanvasListReact}
+                                </div>
                             </div>
                         </div>
                         <div className="col" id="drawingCanvasDiv">
