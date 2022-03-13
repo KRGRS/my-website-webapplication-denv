@@ -60,6 +60,26 @@ class Shape {
 class Line extends Shape {
     constructor(p, sty) {
         super(p, sty);
+        this.finished = false;
+        this.lines = [];
+    }
+
+    calculateLines() {
+        let result = [];
+        for (let i = 0; i < this.points.length; i++) {
+            if (i === this.points.length - 1) {
+                result.push(calcVectorLength(calculateVector(this.points[i - 1], this.points[0])));
+                break;
+            }
+            result.push(calcVectorLength(calculateVector(this.points[i], this.points[i + 1])));
+        }
+
+        return result;
+    }
+
+    finishLine() {
+        this.finished = true;
+        this.lines = this.calculateLines()
     }
 
     returnDetails() {
@@ -755,7 +775,6 @@ class CanvasProvider {
                 this.drawingButtonSelected = false;
                 this.inDrawingConfObj = undefined;
                 this.inDrawingConfiguration = false;
-                this.drawingInterval = undefined;
 
                 this.detailsPanvasListReact = this.create_details_panel_elems(circle);
                 this.reactComponent.forceUpdate();
@@ -784,9 +803,28 @@ class CanvasProvider {
                 this.drawingButtonSelected = false;
                 this.inDrawingConfObj = undefined;
                 this.inDrawingConfiguration = false;
-                this.drawingInterval = undefined;
 
                 clearInterval(this.drawingInterval);
+            }
+        }
+    }
+
+    inLineConfiguration() {
+        if (!this.drawingLoopStop) {
+            if (this.inDrawingConfObj.finished) {
+                this.drawingLoopStop = true;
+                this.objOnCanvas.push(this.inDrawingConfObj);
+
+                this.detailsPanvasListReact = this.create_details_panel_elems(this.inDrawingConfObj);
+                this.reactComponent.forceUpdate();
+
+                this.inDrawingConfObj = undefined;
+                this.inDrawingConfiguration = false;
+                this.countOfPoints = 0;
+                this.temporaryObj = [];
+                this.drawingPoints = [];
+
+                clearInterval(this.drawingInterval)
             }
         }
     }
@@ -795,36 +833,6 @@ class CanvasProvider {
         for (var key in attrs) {
             el.setAttribute(key, attrs[key]);
         }
-    }
-
-    create_elem_adj(elem, cls, value, id) {
-        /* var el = document.createElement(elem);
- 
-         if (cls != undefined) {
-             el.classList.add(cls);
-         }
- 
-         if (value != undefined) {
-             if (elem == 'label') {
-                 el.innerHTML = value;
-             } else {
-                 el.value = value;
-             }
-         }
- 
-         if (id != undefined) {
-             el.id = id;
-         }
- 
-         return el;*/
-    }
-
-    create_input_elem(type, defV) {
-        /*var el = document.createElement('input');
-        el.type = type;
-
-        el.value = defV;
-        return el;*/
     }
 
     /**
@@ -855,7 +863,7 @@ class CanvasProvider {
     */
     renderSwitch(param, elem) {
 
-        console.log(elem);
+        //console.log(elem);
         //console.log(param); 
 
         switch (param) {
@@ -872,7 +880,7 @@ class CanvasProvider {
                             <input type="number" defaultValue={elem.radPoint[1]} onChange={(e) => this.changeAttributesOfCircles(elem, e.target.value, 1, -1)}></input>
                         </div>
                         {elem.points.map((item, ind) => {
-                            return (<div className="details-list-item">
+                            return (<div className="details-list-item" key={ind}>
                                 <label className="details-item-label-top">Point {ind}</label>
                                 <br></br>
                                 <label className="details-item-label"> Point X: </label>
@@ -901,12 +909,11 @@ class CanvasProvider {
                 </div>);
 
             case 'line':
-
                 return (
                     <div className="detailsList">
                         <div>
                             {elem.points.map((item, ind) => {
-                                return (<div className="details-list-item">
+                                return (<div className="details-list-item" key={ind}>
                                     <label className="details-item-label-top">Point {ind}</label>
                                     <br></br>
                                     <label className="details-item-label"> Point X: </label>
@@ -915,6 +922,17 @@ class CanvasProvider {
                                     <label className="details-item-label"> Point Y: </label>
                                     <input type="number" defaultValue={item[1]}></input>
                                 </div>);
+                            })}
+                            {elem.lines.map((item, ind) => {
+                                return (
+                                    <div className="details-list-item" key={ind}>
+                                        <label className="details-item-label-top">Line {ind}: </label>
+                                        <br></br>
+                                        <label className="details-item-label"> Length </label>
+                                        <input type="number" defaultValue={item}></input>
+                                        <br></br>
+                                    </div>
+                                );
                             })}
                         </div>
                     </div>)
@@ -1038,27 +1056,10 @@ class CanvasProvider {
                     case 'line':
                         this.inDrawingConfObj = new Line(this.drawingPoints[0], this.standartStyle);
                         this.temporaryObj.push(this.inDrawingConfObj);
-                        let finishButton = this.create_elem_adj('button', undefined, 'Finish', 'finishButton');
-                        finishButton.innerHTML = "Finish";
-                        this.detailsPanvasList.appendChild(finishButton);
-                        finishButton.onclick = () => {
-
-                            this.temporaryObj = [];
-                            this.drawingPoints = [];
-
-                            this.objOnCanvas.push(this.inDrawingConfObj);
-
-                            document.getElementById('finishButton').remove();
-
-                            this.create_details_panel_elems(this.inDrawingConfObj)
-
-                            this.drawingInterval = undefined;
-                            this.drawingButtonSelected = false;
-                            this.inDrawingConfObj = undefined;
-                            this.type = "none";
-
-                        };
-                        this.drawingInterval = 1;
+                        this.drawingLoopStop = false;
+                        this.drawingInterval = setInterval(this.inLineConfiguration.bind(this), 100);
+                        this.detailsPanvasListReact = (<button id="finishButton" className="Finish" onClick={() => { this.inDrawingConfObj.finishLine() }}> Finish </button>);
+                        this.reactComponent.forceUpdate();
                         break;
 
                     case 'rectangle':
@@ -1099,10 +1100,10 @@ class CncFrame extends Component {
     constructor() {
         super();
         this.canvProvider = new CanvasProvider(this);
-        this.fullScreenState = false; 
+        this.fullScreenState = false;
         this.changeFullScreenState = () => {
-            this.fullScreenState? this.fullScreenState = false : this.fullScreenState = true; 
-            this.forceUpdate(); 
+            this.fullScreenState ? this.fullScreenState = false : this.fullScreenState = true;
+            this.forceUpdate();
         }
     }
 
@@ -1117,12 +1118,12 @@ class CncFrame extends Component {
     render() {
 
         return (
-            <div id="appFrame" className={this.fullScreenState? 'fullscreen' : ''}>
+            <div id="appFrame" className={this.fullScreenState ? 'fullscreen' : ''}>
                 <div className="row">
                     <div className="col">
                         <div className='wood-div'>
                             <label htmlFor="woodWidth" className='wood-column'> Width of Wood:</label>
-                            <input type="number" min="5" id="woodWidth" className='wood-column' />
+                            <input type="number" min="5" id="woodWidth" className='wood-column' step='10'/>
                         </div>
                     </div>
                     <div className="col">
@@ -1159,7 +1160,10 @@ class CncFrame extends Component {
                             </div>
                         </div>
                         <div className='col'>
-                            <button type="button" className="btn btn-secondary">repeate pattern</button></div>
+                            <div className="btn-group">
+                                <button type="button" className="btn btn-secondary">repeate pattern</button>
+                            </div>
+                        </div>
                         <div className='col'></div>
                     </div>
 
@@ -1192,7 +1196,7 @@ class CncFrame extends Component {
 
 
                     <div className="row canvasRow">
-                        <div className="col-4 detailRow">
+                        <div className="col-3 detailRow">
                             <h3 className="details-header">Details:</h3>
                             <div id="details-list">
                                 {this.canvProvider.detailsPanvasListReact}
@@ -1259,27 +1263,5 @@ function calculateDistance(x1, y1, x2, y2) {
 
     return Math.sqrt(xdif + ydif);
 }
-
-/* <li>
-                                    <div class="detailsListItem">
-                                        <label class="details-item-label">Point x</label>
-                                        <input type="number">
-                                            <br>
-                                                <label class="details-item-label">Point x</label>
-                                                <input type="number"/>
-                                                </div>
-                                            </li>
-                                            <li>
-                                                <div class="detailsListItem">
-                                                    <label class="details-item-label">Point Y</label>
-                                                    <input type="number"/>
-                                                </div>
-                                            </li>
-                                            <li>
-                                                <div class="detailsListItem">
-                                                    <label class="details-item-label">Point Z</label>
-                                                    <input type="number"/>
-                                                </div>
-                                            </li>*/
 
 export default CncFrame; 
