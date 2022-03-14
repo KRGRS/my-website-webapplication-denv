@@ -1,0 +1,95 @@
+.header {
+    font-size: 10rem; 
+    text-align: center;
+    padding-top: 1.5rem; 
+    padding-bottom: 1.5rem; 
+    margin: auto; 
+    text-shadow: 2px 2px 8px gold;
+}
+
+label {
+    font-size: 2rem; 
+    margin-bottom: 0.3rem;
+}
+
+.fillout {
+    min-height: 100%;
+    min-width: 100%;
+    height: 100%;
+
+}
+
+.submitButton {
+    height: 3rem; 
+    width: 6rem; 
+    align-self: flex-end;
+    margin-right: 2rem;
+    margin-bottom: 2rem;
+    border-radius: 15px;
+}
+
+.registerLink {
+    align-self: flex-start;
+    font-size: 1.5rem;
+    margin-left: 2rem; 
+    margin-bottom: 2rem; 
+    padding-left: 3.6rem;     
+}
+
+.loginComp {
+    align-items: center;
+    padding-right: 1rem; 
+    padding-left: 1rem; 
+    margin: auto; 
+}
+
+.background {
+    min-height: 100%;
+    background-color: #e5e5f7;
+    opacity: 0.8;
+    background: linear-gradient(135deg, #444cf755 25%, transparent 25%) -10px 0/ 20px 20px, linear-gradient(225deg, #444cf7 25%, transparent 25%) -10px 0/ 20px 20px, linear-gradient(315deg, #444cf755 25%, transparent 25%) 0px 0/ 20px 20px, linear-gradient(45deg, #444cf7 25%, #57a15b 25%) 0px 0/ 20px 20px;
+}
+
+.form {
+    align-items: center;
+}
+
+.errorSpan {
+    background-color: lightcoral; 
+    opacity: 0.5;
+    font-size: 2rem;
+    text-align: center;
+    align-items: baseline;
+}
+
+form {
+    border: 1px solid black; 
+    border-radius: 20px; 
+    min-width: 100%;
+    min-height: fit-content;
+    display: flex; 
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden; 
+    background-image: linear-gradient(white, grey); 
+}
+
+.label {
+    margin-bottom: 4rem; 
+}
+
+.loginlabel {
+    padding: 0.3rem;
+    margin: 0.3rem;  
+}
+
+input {
+    border-radius: 10px;
+}
+
+form > input{
+    margin: auto; 
+    padding-left: 0.3rem; 
+    padding-top: 0.4rem; 
+    padding-bottom: 0.1rem; 
+}

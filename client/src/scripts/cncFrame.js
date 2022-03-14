@@ -45,8 +45,8 @@ class Shape {
 
         for (let i = 1; i < this.points.length; i += 1) {
 
-            ctx.beginPath(); 
-            ctx.moveTo(this.points[i-1][0], this.points[i-1][1]); 
+            ctx.beginPath();
+            ctx.moveTo(this.points[i - 1][0], this.points[i - 1][1]);
 
             let point2 = this.points[i];
 
@@ -55,7 +55,7 @@ class Shape {
             ctx.lineTo(point2[0], point2[1]);
 
             ctx.fillText(i, point2[0], point2[1]);
- 
+
             ctx.stroke();
         }
     }
@@ -454,12 +454,62 @@ class Rectangle extends Shape {
         })
     }
 
+    changeLineValues(value, index) {
+        this.cogP = [];
+        let quot = value / this.lines[index];
+        let newx = this.points[index][0] + quot * calculateVector(this.points[(index + 1) > 3 ? 0 : (index+1)], this.points[index])[0];
+        let newy = this.points[index][1] + quot * calculateVector(this.points[(index + 1) > 3 ? 0 : (index+1)], this.points[index])[1];
+
+        this.points[(index + 1) > 3 ? 0 : (index+1)] = [newx, newy];
+
+        this.calculateMiddlePoint();
+    }
+
+    changePoints(value, index) {
+        let diffrence = value - this.middlePoint[index];
+        this.middlePoint[index] = value;
+        this.points.map((item) => {
+            return item[index] += diffrence;
+        })
+
+        this.cogP = [];
+        this.calculateMiddlePoint();
+    }
+
     finish() {
-        this.middlePoint = this.calculateMiddlePoint(); 
+        this.middlePoint = this.calculateMiddlePoint();
         this.lines = this.calculateLineLength().map((item) => {
-            return item.toFixed(2); 
+            return item.toFixed(2);
         });
         this.rotationAngle = this.calculateRotation().toFixed(2);
+    }
+
+    rotateCrucialPoint(value) {
+
+        this.cogP = [];
+
+        let difference = value - this.rotationAngle;
+        let rot = createRotMatrix(difference);
+
+        //create Point at (0 + x, 0 + y) to get the unit vector 
+        let pointX = calculateVector(this.points[0], this.middlePoint)[0];
+        let pointY = calculateVector(this.points[0], this.middlePoint)[1];
+
+        let newX = pointX * rot[0][0] + pointY * rot[0][1];
+        let newY = pointX * rot[1][0] + pointY * rot[1][1];
+
+        let unitVector = calculateVector([newX, newY], this.points[0]);
+
+        this.points.map((item, ind) => {
+            if (ind === 0) {
+                return [newX, newY];
+            } else {
+                return [item[0] + unitVector[0], item[1] + unitVector[1]];
+            }
+        })
+
+        this.calculateMiddlePoint();
+
     }
 
     calculateRotation() {
@@ -830,7 +880,7 @@ class CanvasProvider {
                 this.countOfPoints = 0;
                 this.inDrawingConfObj = undefined;
                 this.inDrawingConfiguration = false;
-                this.drawingButtonSelected = false; 
+                this.drawingButtonSelected = false;
 
                 this.drawingInterval = clearInterval(this.drawingInterval)
             }
@@ -849,14 +899,14 @@ class CanvasProvider {
      * @param {Number} value 
      * @param {Number} type 
      */
-    changeSpecialAttributesOfCircles(obj, value, type){
-        if(type === 0){
-            obj.countOfPoints = value; 
-        }else{
-            obj.rotationAngle = value; 
+    changeSpecialAttributesOfCircles(obj, value, type) {
+        if (type === 0) {
+            obj.countOfPoints = value;
+        } else {
+            obj.rotationAngle = value;
         }
 
-        obj.changeAttributes(); 
+        obj.changeAttributes();
     }
 
     /**
@@ -875,8 +925,35 @@ class CanvasProvider {
         obj.changeAttributes();
     }
 
-    changeAttributesOfLine() {
+    /**
+     * Function to change a point
+     * @param {Rectangle} obj 
+     * @param {Number} value 
+     * @param {Number} index 
+     * @param {Number} type
+     */
+    changeAttributesOfRect(obj, value, index, type) {
+        if (index === -1) {
+            obj.changePoints(value, type);
+        } else {
+            obj.points[index][type] = value;
+        }
+    }
 
+    /**
+     * -1 == rotation; 0< == changing lines 
+     * @param {Rectangle} obj 
+     * @param {Number} value 
+     * @param {Number} index 
+     * @param {Number} type -1 rot; 0< lines 
+     * @returns undefined
+     */
+    changeSpecialAttributesOfRect(obj, value, index, type) {
+        if (type === -1) {
+            obj.rotateCrucialPoint(value);
+        } else {
+            obj.changeLineValues(value, type);
+        }
     }
 
     /** 
@@ -970,10 +1047,10 @@ class CanvasProvider {
                                 <label className="details-item-label-top">Middle Point:</label>
                                 <br></br>
                                 <label className="details-item-label"> Point X: </label>
-                                <input type="number" defaultValue={elem.middlePoint[0]}></input>
+                                <input type="number" defaultValue={elem.middlePoint[0]} onChange={(e) => { this.changeAttributesOfRect(elem, e.target.value, -1, 0) }}></input>
                                 <br></br>
                                 <label className="details-item-label"> Point Y: </label>
-                                <input type="number" defaultValue={elem.middlePoint[1]}></input>
+                                <input type="number" defaultValue={elem.middlePoint[1]} onChange={(e) => { this.changeAttributesOfRect(elem, e.target.value, -1, 1) }}></input>
                             </div>
 
 
@@ -983,10 +1060,10 @@ class CanvasProvider {
                                         <label className="details-item-label-top">Point {ind}:</label>
                                         <br></br>
                                         <label className="details-item-label"> Point X: </label>
-                                        <input type="number" defaultValue={item[0]}></input>
+                                        <input type="number" defaultValue={item[0]} onChange={(e) => { this.changeAttributesOfRect(elem, e.target.value, ind, 0) }}></input>
                                         <br></br>
                                         <label className="details-item-label"> Point Y: </label>
-                                        <input type="number" defaultValue={item[1]}></input>
+                                        <input type="number" defaultValue={item[1]} onChange={(e) => { this.changeAttributesOfRect(elem, e.target.value, ind, 1) }}></input>
                                     </div>
                                 );
                             })}
@@ -997,7 +1074,7 @@ class CanvasProvider {
                                         <label className="details-item-label-top">Line {ind}: </label>
                                         <br></br>
                                         <label className="details-item-label"> Length </label>
-                                        <input type="number" defaultValue={item}></input>
+                                        <input type="number" defaultValue={item} onChange={(e) => { this.changeSpecialAttributesOfRect(elem, e.target.value, 0, ind) }}></input>
                                         <br></br>
                                     </div>
                                 );
@@ -1005,7 +1082,7 @@ class CanvasProvider {
                             <div className="details-list-item">
                                 <label className="details-item-label-top"> Rotation (in degrees): </label>
                                 <label className="details-item-label"></label>
-                                <input type="number" defaultValue={elem.rotationAngle}></input>
+                                <input type="number" defaultValue={elem.rotationAngle} onChange={(e) => { this.changeSpecialAttributesOfRect(elem, e.target.value, 0, -1) }}></input>
                             </div>
                         </div>
                     </div>);
@@ -1148,7 +1225,7 @@ class CncFrame extends Component {
                     <div className="col">
                         <div className='wood-div'>
                             <label htmlFor="woodWidth" className='wood-column'> Width of Wood:</label>
-                            <input type="number" min="5" id="woodWidth" className='wood-column' step='10'/>
+                            <input type="number" min="5" id="woodWidth" className='wood-column' step='10' />
                         </div>
                     </div>
                     <div className="col">
@@ -1225,7 +1302,7 @@ class CncFrame extends Component {
                             <h3 className="details-header">Details:</h3>
                             <div id="details-list">
                                 <div className='overflow-wrapper'>
-                                {this.canvProvider.detailsPanvasListReact}
+                                    {this.canvProvider.detailsPanvasListReact}
                                 </div>
                             </div>
                         </div>
