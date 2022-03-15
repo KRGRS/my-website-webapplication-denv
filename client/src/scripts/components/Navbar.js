@@ -7,6 +7,9 @@ import { Navbar, NavDropdown, Nav, Container } from 'react-bootstrap';
  * @returns undefined
  */
 function MyNavbar() {
+
+    let token = localStorage.getItem('token'); 
+
     return (
         <Navbar bg="dark" variant="dark" className="py-4">
             <Container fluid>
@@ -30,7 +33,17 @@ function MyNavbar() {
                             <NavDropdown.Item href="#" className="navbar-title">Link1</NavDropdown.Item>
                         </NavDropdown>
                         <Nav className="ml-right">
+                            {!token ? 
                             <Nav.Link className="justify-content-end" href="/login">User</Nav.Link>
+                            : 
+                            <NavDropdown className="justify-content-end" title="Welcome">
+                                <NavDropdown.Item href="/dashboard" className="navbar-title"> Dashboard </NavDropdown.Item>
+                                <NavDropdown.Divider></NavDropdown.Divider>
+                                <NavDropdown.Item onClick={(e) => {
+                                    localStorage.removeItem('token');   
+                                }} href="/login"> Log Out </NavDropdown.Item>
+                            </NavDropdown>
+                            }
                         </Nav>
 
                     </Nav>
