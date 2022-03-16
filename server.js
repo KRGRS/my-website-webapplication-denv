@@ -156,8 +156,6 @@ app.post("/login", (req, res) => {
 })
 
 app.post('/save', (req, res) => {
-
-
     connection.query('SELECT token FROM activeTokens WHERE token=(?)', [req.body.token], function (err, result) {
         if (err) throw err;
     })
@@ -173,6 +171,23 @@ app.post('/save', (req, res) => {
         }); 
 
         res.sendStatus(201); 
+    })
+})
+
+app.post('/getUserFiles', (req, res) => {
+
+    connection.query('SELECT token FROM activeTokens WHERE token=(?)', [req.body.token], function (err, result) {
+        if (err) throw err;
+    })
+
+    jwt.verify(JSON.parse(req.body.token).token, process.env.TOKEN_SECRET, { algorithms: ['HS256'] }, (err, decoded) => {
+        if (err) {
+        }
+
+        fs.readdir(path.join(__dirname, "user_files", decoded.username), (err, files) => {
+            if(err != null)throw err; 
+            res.send({files: JSON.stringify(files)}); 
+        })
     })
 })
 

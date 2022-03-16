@@ -9,7 +9,7 @@ export class CncFrame extends Component {
      * 
      * @param {Object} url 
      */
-    constructor({name = undefined}) {
+    constructor({projectTitle = undefined}) {
         super();
         this.canvProvider = new CanvasProvider(this);
         this.fullScreenState = false;
@@ -17,7 +17,7 @@ export class CncFrame extends Component {
             this.fullScreenState ? this.fullScreenState = false : this.fullScreenState = true;
             this.forceUpdate();
         }
-        if(name !== undefined){
+        if(projectTitle !== undefined){
 
         }
 

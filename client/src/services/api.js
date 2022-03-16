@@ -11,6 +11,22 @@ function getAPICall(url, body){
     .then((data) => data); 
 }
 
+function postAPIProjectsCall(url, body){
+    return fetch(url, {
+        method: 'POST', 
+        headers: {
+            'Content-Type' : 'application/json'
+        }, 
+        body: body
+    }).then((data) => data.json())
+    .then(data => { 
+        return data.files; 
+    })
+    .catch((err) => {
+        throw err; 
+    })
+}
+
 function postAPICall(url, body){
     return fetch(url, {
         method: 'POST', 
@@ -31,4 +47,4 @@ function postAPICall(url, body){
 
 
 
-export {getAPICall, postAPICall}; 
+export {getAPICall, postAPICall, postAPIProjectsCall}; 
