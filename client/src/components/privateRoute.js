@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Route } from "react-router";
 import { Navigate, Outlet } from "react-router-dom";
 
 

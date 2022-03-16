@@ -1,5 +1,5 @@
 import 'bootstrap/dist/css/bootstrap.css';
-import { Component, useState } from 'react';
+import { useState } from 'react';
 import styles from '../css/login.module.css';
 import { PropTypes } from 'prop-types';
 import { useNavigate } from 'react-router';

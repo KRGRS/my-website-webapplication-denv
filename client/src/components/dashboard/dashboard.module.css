@@ -1,0 +1,140 @@
+
+/*
+    void (blackish: #0e0b16 
+    Fushia (violet) : #a239ca
+    jewel (blue): #4717F6
+    Stark (white): #e7dfdd
+
+*/
+
+
+
+.header {
+    font-size: 8rem; 
+    color: #4717F6;
+    padding-top: 4rem; 
+    padding-bottom: 0.5rem; 
+    margin: auto; 
+    text-align: center;
+    padding-left: 3rem; 
+    padding-top: 1.rem; 
+}
+
+.fillout {
+    height: 100%;  
+    width: 100%; 
+}
+
+.projectsdiv {
+    background: #e7dfdd; 
+    position: sticky;
+    height: 13rem; 
+}
+
+.projects {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    margin: auto; 
+}
+
+.projectView {
+    display: flex; 
+    flex-direction: row;
+    /*border: black 1px solid; */
+    margin-right: 2rem;
+    padding-left: 2rem; 
+    margin-bottom: 2rem; 
+}
+
+.projectViewHeader {
+    margin-right: 2rem; 
+    margin-bottom: 1.5rem; 
+    margin-top: 0.5rem; 
+    color: #e7dfdd; 
+}
+
+.projectViewItem {
+    border: 2px solid green; 
+    margin: 0.8rem; 
+    width: 200px; 
+}
+
+.projectViewItem > p {
+    text-align: center;
+    margin:auto; 
+    padding-top: 0.1rem;
+    padding-bottom: 0.1rem;
+    width: 100%;  
+    display: inline-block; 
+    color: #e7dfdd; 
+}
+
+.testPic {
+    height: 150px; 
+    width: 210px; 
+    border: 2px red solid; 
+    margin-bottom: 0;
+}
+.recDiv {
+    padding-top: 5rem; 
+}
+
+.wrapper {
+    background-color: #0e0b16;
+    height: 100%; 
+    width: 100%; 
+    padding-top: 5rem; 
+}
+
+.projectsdiv::after {
+    content: "";
+    display: block;
+    position: absolute;
+    border-radius: 100% 40% 0% 80% / 89% 43% 57% 11%; 
+    width: 52.5%;
+    height: 130%;
+    background-color: #0e0b16;
+    right: 10px;
+    top: 80px;
+}
+
+.projectsdiv::before {
+    content: "";
+    display: block;
+    position: absolute;
+    border-top-right-radius: 0% !important;
+    border-radius: 0% 100% 18% 82% / 45% 89% 11% 55%; 
+    width: 52.3%;
+    height: 150%;
+    background-color: #e7dfdd;   
+    left: -50px;
+    top: 0px;
+}
+
+.newProjectButton {
+    display: flex; 
+    flex-direction: row;
+    width: fit-content; 
+    align-items: baseline;
+    padding-top: 0rem; 
+    padding-bottom: 0.5rem; 
+    margin-left: 3rem; 
+    margin-bottom: auto; 
+    margin-right: auto; 
+    margin-top: auto;  
+    border-radius: 10px;
+    background-color: #a239ca;
+    border-color: #a239ca;
+}
+
+.newProjectButton > span, .newProjectButton > b {
+    font-size: 2rem; 
+    color: #e7dfdd; 
+    padding: 0.3rem; 
+}
+
+.newProjectButton > span {
+    font-weight: bold;
+    font-size: 2.5rem;
+}

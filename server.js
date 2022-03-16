@@ -14,7 +14,7 @@ var pbkdf2 = require('pbkdf2')
 //get config vars 
 dotenv.config({path: './.env', override: false}); 
 
-console.log(process.env.DB_HOST); 
+//console.log(process.env.DB_HOST); 
 
 
 //connect to DB 
@@ -31,7 +31,7 @@ connection.connect(function(err){
         return console.error('error:' + err.message); 
     }
 
-    console.log("successfully connected to database"); 
+    //console.log("successfully connected to database"); 
 }); 
 
 //CORS middleware
@@ -68,39 +68,79 @@ function hashPassword(password) {
 }
 
 function isPasswordCorrect(savedHash, savedSalt, savedIterations, passwordAttempt) {
-    return savedHash == pbkdf2.pbkdf2Sync(passwordAttempt, savedSalt, savedIterations, 32, 'sha512');
+    
+    return (savedHash.toString() == pbkdf2.pbkdf2Sync(passwordAttempt, savedSalt, savedIterations, 32, 'sha512').toString());
 }
 
 //routing 
 app.get("/", (req, res) => {
-    
+    res.sendFile(path.join(__dirname, 'client', 'public', 'index.html')); 
 }); 
+
+app.post("/auth", (req, res) => {
+
+    connection.query('SELECT token FROM activeTokens WHERE token=(?)', [req.body.token], function(err, result){
+        if(err)throw err; 
+    })
+
+    jwt.verify(req.body.token, process.env.TOKEN_SECRET, {algorithms: ['HS256']}, (err, decoded) => {
+        if(err){
+            res.send({'auth': false}); 
+            return; 
+        }
+        
+        res.send({'auth' : true}); 
+        return; 
+    })
+})
 
 app.post("/register", (req, res) => {
     const username = req.body.username; 
     const password = req.body.password;
 
-    let passValues = hashPassword(password); 
+    let passValues = hashPassword(password);
+    let calculatedToken = generateAccessToken({username: username}); 
 
-    connection.query('INSERT INTO users (username, password, salt, iterations) VALUES (?, ?, ?, ?)', [username, passValues.hash.toString(), passValues.salt, passValues.iterations], function(err, result) {
-        if (err) throw err; 
+    connection.query('INSERT INTO users (username, password, salt, iterations) VALUES (?, ?, ?, ?)', [username, passValues.hash, passValues.salt, passValues.iterations], function(err, result) {
+        if (err){
+            if(err.code == "ER_DUP_ENTRY"){
+                res.send({'error' : 'dub_err'}); 
+                return; 
+            }
+        }else{
+            connection.query('INSERT INTO activeTokens (token) VALUES (?)', [calculatedToken], function(err, result){
+                if(err) throw err; 
+            })
+        }
 
         res.send({
-            token: generateAccessToken({username: username})
+            token: calculatedToken
         })
     })
 })
 
 app.post("/login", (req, res) => {
+
     const username = req.body.username; 
-    const password = JSON.parse(req.body.password);  
+    const password = req.body.password;  
 
     connection.query('SELECT password, salt, iterations FROM users WHERE username=(?)', [username], function(err, result){
-        if (err) throw err; 
+        if (err){
+            throw err; 
+        }; 
 
-        if(isPasswordCorrect(result[0].password, result[0].salt, result[0].iterations, password)){
+        //console.log(isPasswordCorrect(result[0].password, result[0].salt, +result[0].iterations, password)); 
+
+        if(isPasswordCorrect(result[0].password, result[0].salt, +result[0].iterations, password)){
+
+            let generatedToken = generateAccessToken({username: username}); 
+
+            connection.query('INSERT INTO activeTokens (token) VALUES (?)', [generatedToken], function(err, result){
+                if(err) throw err; 
+            })
+
             res.send({
-                token: generateAccessToken({username: username})
+                token: generatedToken
             })  
         }
     })
