@@ -20,7 +20,7 @@ function App() {
     <CncFrame />
   </div>);
 
-  authentification()
+  authentification(); 
 
   const dashboard = (<Dashboard></Dashboard>);
 

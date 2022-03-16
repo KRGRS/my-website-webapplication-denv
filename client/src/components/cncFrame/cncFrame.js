@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import Canvas from '../canvas';
-import {getAPICall} from '../../services/api.js'; 
+import { postAPICall } from '../../services/api.js';
 import { CanvasProvider } from './canvasProvider';
+import { saveClass } from '../../services/saveClass';
 
 export class CncFrame extends Component {
     /**
@@ -21,16 +22,26 @@ export class CncFrame extends Component {
         }
 
         this.saveFile = undefined; 
-        this.DillFile = undefined; 
+        this.DrillFile = undefined; 
     }
 
     generateDrillFile(){
 
     }
 
-    generateSaveFile(){
-        let obj = {}
+    async generateSaveFile(){
+        let saveFile = JSON.stringify(new saveClass(this.canvProvider)); 
         
+        if(await postAPICall('http://localhost:5000/save', JSON.stringify({
+                token: localStorage.getItem('token'), 
+                data: saveFile, 
+                title : "test"
+            })
+        )){
+            alert("File was succesfully saved!"); 
+        }else{
+            alert("There was an error saving your file..."); 
+        }
     }
 
     printHelloStatement() {
@@ -142,6 +153,7 @@ export class CncFrame extends Component {
                         <div className="col"></div>
                         <div className="col">
                             <button type="button" className="btn btn-secondary finishButton" onClick={this.printHelloStatement}>Export</button>
+                            <button type="button" className="btn btn-secondary finishButton" onClick={(e) => this.generateSaveFile()}>Save</button>
                         </div>
                         <div className="col"></div>
                     </div>
