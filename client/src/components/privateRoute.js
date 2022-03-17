@@ -12,11 +12,11 @@ const PrivateRoute = ({ ...rest }) => {
         let token = localStorage.getItem("token");
         if (token) {
             fetch('http://localhost:5000/auth', {
-                method: 'POST',
+                method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json', 
+                    'Authorization' : token
                 },
-                body: token
                 })
                 .then((res) => {
                     return res.json()

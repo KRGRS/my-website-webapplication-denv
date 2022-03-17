@@ -44,7 +44,8 @@ async function registerUser(credentials) {
 
 export default function Login ({ setToken }){
 
-    const [username, setUsername] = useState();
+    const [username, setUsername] = useState(); 
+    const [email, setEmail] = useState();
     const [password, setPassword] = useState();
     const [Lstate, setLState] = useState('login');
     const [cpassword, setCpassword] = useState();
@@ -56,7 +57,7 @@ export default function Login ({ setToken }){
         e.preventDefault();
         if (Lstate === 'register') {
             if (cpassword === password) {
-                const token = await registerUser(JSON.stringify({ 'username': username, 'password': password })); 
+                const token = await registerUser(JSON.stringify({ 'email': email, 'password': password, 'username' : username})); 
                 if (token === '') {
                     setInvalidity(true);
                 } else if(token.error !== undefined && token.error === "dub_err"){
@@ -71,7 +72,7 @@ export default function Login ({ setToken }){
                 setInvalidity(true);
             }
         } else {
-            const token = await loginUser(JSON.stringify({ 'username': username, 'password': password }));
+            const token = await loginUser(JSON.stringify({ 'email': email, 'password': password }));
             if (token === '') {
                 setInvalidity(true);
             } else {
@@ -89,9 +90,16 @@ export default function Login ({ setToken }){
             <div className='col-4 loginComp'>
                 <h1 className={styles.header}>Login</h1>
                 <form className={styles.form} onSubmit={handleSubmit} action={Lstate === 'login' ? '/login' : '/register'}>
+
+                    {Lstate !== 'login' ? 
+                    <label className={styles.label}>
+                        <p><b>Username</b></p>
+                        <input type="text" onChange={e => setUsername(e.target.value)} required></input>
+                    </label>: null}
+
                     <label className={styles.label}>
                         <p className={styles.loginlabel}><b>User:</b></p>
-                        <input type="email" onChange={e => setUsername(e.target.value)} required></input>
+                        <input type="email" onChange={e => setEmail(e.target.value)} required></input>
                     </label>
 
 

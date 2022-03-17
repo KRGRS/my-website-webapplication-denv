@@ -7,40 +7,18 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
-const mysql = require('mysql');
-const crypto = require('crypto');
-var pbkdf2 = require('pbkdf2'); 
-var fs = require('fs'); 
+const fs = require('fs'); 
+const connection = require('./src/utils/database.js');  
+const openRouter = require('./src/api-routes/open.routes'); 
 
 //get config vars 
-dotenv.config({ path: './.env', override: false });
-
-//console.log(process.env.DB_HOST); 
-
-
-//connect to DB 
-const connection = mysql.createConnection({
-    host: process.env.DB_HOST.toString(),
-    user: process.env.DB_USER.toString(),
-    password: '1234',
-    database: process.env.DB.toString(),
-    insecureAuth: true
-});
-
-connection.connect(function (err) {
-    if (err) {
-        return console.error('error:' + err.message);
-    }
-
-    //console.log("successfully connected to database"); 
-});
+dotenv.config({ path: './config/.env', override: false });
 
 //CORS middleware
 var corsMiddleware = function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*'); //replace localhost with actual host
     res.header('Access-Control-Allow-Methods', 'OPTIONS, GET, PUT, PATCH, POST, DELETE');
     res.header('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With, Authorization');
-
     next();
 }
 
@@ -51,27 +29,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(corsMiddleware);
 
-//functions 
-function generateAccessToken(username) {
-    return jwt.sign(username, process.env.TOKEN_SECRET, { expiresIn: '1800s' });
-}
+//define Routers for Server 
+app.use('/', openRouter); 
+app.use('/:user', userRouter); 
 
-function hashPassword(password) {
-    var salt = crypto.randomBytes(128).toString('base64');
-    var iterations = 10000;
-    var hash = pbkdf2.pbkdf2Sync(password, salt, iterations, 32, 'sha512');
-
-    return {
-        salt: salt,
-        hash: hash,
-        iterations: iterations
-    };
-}
-
-function isPasswordCorrect(savedHash, savedSalt, savedIterations, passwordAttempt) {
-
-    return (savedHash.toString() == pbkdf2.pbkdf2Sync(passwordAttempt, savedSalt, savedIterations, 32, 'sha512').toString());
-}
 
 //routing 
 app.get("/", (req, res) => {
@@ -92,66 +53,6 @@ app.post("/auth", (req, res) => {
 
         res.send({'auth' : true});
         return;
-    })
-})
-
-app.post("/register", (req, res) => {
-    const username = req.body.username;
-    const password = req.body.password;
-
-    let passValues = hashPassword(password);
-    let calculatedToken = generateAccessToken({ username: username });
-
-    connection.query('INSERT INTO users (username, password, salt, iterations) VALUES (?, ?, ?, ?)', [username, passValues.hash, passValues.salt, passValues.iterations], function (err, result) {
-        if (err) {
-            if (err.code == "ER_DUP_ENTRY") {
-                res.send({ 'error': 'dub_err' });
-                return;
-            }
-        } else {
-            connection.query('INSERT INTO activeTokens (token) VALUES (?)', [calculatedToken], function (err, result) {
-                if (err) throw err;
-            })
-        }
-
-        try{
-            if(fs.existsSync(path.join(__dirname, "user_files", username))){
-                fs.mkdirSync(path.join(__dirname, "user_files", username)); 
-            }
-        }catch(err){
-            console.error(err); 
-        }
-
-        res.send({
-            token: calculatedToken
-        })
-    })
-})
-
-app.post("/login", (req, res) => {
-
-    const username = req.body.username;
-    const password = req.body.password;
-
-    connection.query('SELECT password, salt, iterations FROM users WHERE username=(?)', [username], function (err, result) {
-        if (err) {
-            //console.log("------------\n" + err);
-        };
-
-        //console.log(isPasswordCorrect(result[0].password, result[0].salt, +result[0].iterations, password)); 
-
-        if (isPasswordCorrect(result[0].password, result[0].salt, +result[0].iterations, password)) {
-
-            let generatedToken = generateAccessToken({ username: username });
-
-            connection.query('INSERT INTO activeTokens (token) VALUES (?)', [generatedToken], function (err, result) {
-                if (err) throw err;
-            })
-
-            res.send({
-                token: generatedToken
-            })
-        }
     })
 })
 
