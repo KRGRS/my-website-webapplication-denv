@@ -1,12 +1,16 @@
 const crypto = require("crypto"); 
 const jwt = require('jsonwebtoken'); 
+const { builtinModules } = require("module");
 const pbkdf2 = require('pbkdf2'); 
-require('dotenv').config("../config/.env"); 
+const dotenv = require("dotenv"); 
+const path = require("path"); 
+
+dotenv.config({ path: path.normalize(path.join(__dirname,  "..", "config", ".env")), override: false });
 
 
 //functions 
-function generateAccessToken(username) {
-    return jwt.sign(username, process.env.TOKEN_SECRET, { expiresIn: '1800s' });
+function generateAccessToken(email) {
+    return jwt.sign(email, process.env.TOKEN_SECRET, { expiresIn: '1h' });
 }
 
 function hashPassword(password) {
@@ -27,4 +31,4 @@ function isPasswordCorrect(savedHash, savedSalt, savedIterations, passwordAttemp
     return (savedHash.toString() == pbkdf2.pbkdf2Sync(passwordAttempt, savedSalt, savedIterations, 32, 'sha512').toString());
 }
 
-export {generateAccessToken, hashPassword, isPasswordCorrect}; 
+module.exports = {generateAccessToken, hashPassword, isPasswordCorrect}; 

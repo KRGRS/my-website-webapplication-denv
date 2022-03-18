@@ -1,5 +1,5 @@
 export default function authentification() {
-  let token = localStorage.getItem('token'); 
+  /*let token = localStorage.getItem('token'); 
   fetch('http://localhost:5000/auth', {
     method: 'POST',
     headers: {
@@ -13,5 +13,5 @@ export default function authentification() {
     .then((data) => {return data.auth })
     .catch(err => {
       console.error(err); 
-    }); 
+    }); */
 }

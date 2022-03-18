@@ -17,10 +17,10 @@ async function loginUser(credentials) {
         .then(data => {
             return data; 
         })
-    /*.catch((error) => {
+    .catch((error) => {
         console.warn("error occured: " + error); 
-        return ''; 
-    }); */
+        return null; 
+    }); 
 }
 
 async function registerUser(credentials) {
@@ -35,10 +35,10 @@ async function registerUser(credentials) {
         .then(data => {
             return data;
         })
-    /*.catch((error) => {
+    .catch((error) => {
         console.warn('error occured: ' + error); 
         return ''; 
-    })*/
+    })
 }
 
 
@@ -63,12 +63,12 @@ export default function Login ({ setToken }){
                 } else if(token.error !== undefined && token.error === "dub_err"){
                     setInvalidity(true); 
                 }else{
-                    setToken(token);
-                    navigate('/dashboard', {replace: true}); 
-                    //window.location.href = "/dashboard"; 
+                    setToken(token.token);
+                    localStorage.setItem("username", JSON.stringify(username)); 
+                    navigate('/' + localStorage.getItem('username').replace(/"/g, "") + '/dashboard', {replace: true}); 
                 }
             } else {
-                //the two passwords are not connected 
+                //the two passwords are not the same 
                 setInvalidity(true);
             }
         } else {
@@ -76,9 +76,10 @@ export default function Login ({ setToken }){
             if (token === '') {
                 setInvalidity(true);
             } else {
-                setToken(token);
-                navigate('/dashboard', {replace: true}); 
-                //window.location.href="/dashboard"; 
+                setToken(token.token); 
+                setUsername(token.username); 
+                localStorage.setItem("username", JSON.stringify(token.username)); 
+                navigate('/' + localStorage.getItem('username').replace(/"/g, "") + '/dashboard', {replace: true}); 
             }
         }
     }

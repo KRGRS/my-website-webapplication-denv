@@ -9,18 +9,21 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import useToken from './services/useToken';
 import authentification from './services/auth';
 import PrivateRoute from './components/privateRoute';
-import { Dashboard , CncFrame} from './components';
+import { Dashboard, CncFrame } from './components';
+import { useParams } from 'react-router';
+import { Navigate } from 'react-router';
 
 function App() {
 
   const { token, setToken } = useToken();
+  let { user } = useParams();
 
   const ApplicationComponents = (<div>
     <PageHeader />
     <CncFrame />
   </div>);
 
-  authentification(); 
+  authentification();
 
   const dashboard = (<Dashboard></Dashboard>);
 
@@ -28,29 +31,29 @@ function App() {
     return (<Login setToken={value}></Login>);
   }
 
+  /* 
+     <Route path="/a" element={<PrivateRoute />}>
+            <Route exact path="/a" element=
+              {ApplicationComponents}>
+            </Route>
+          </Route>
+  */
+
   return (
     <div className={loginStyles.fillout}>
       <MyNavbar />
       <Router>
         <Routes>
 
-          <Route path="/" element={<PrivateRoute />}>
-            <Route exact path="/" element=
-              {ApplicationComponents}>
-            </Route>
-          </Route>
-
-
           <Route path='/login'
             element={loginComponents(setToken)}>
           </Route>
 
-
-          <Route path="/dashboard" element={<PrivateRoute />}>
-            <Route path="/dashboard" element={dashboard}></Route>
+          <Route path="/:user">
+            <Route path="/:user/dashboard" element={dashboard}/>
           </Route>
 
-          <Route path='/dashboard' element={dashboard}></Route>
+          <Route path="/" element={<Navigate to="/login"/>}/>
 
         </Routes>
       </Router>

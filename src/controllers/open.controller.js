@@ -1,5 +1,5 @@
-import { hashPassword, generateAccessToken, isPasswordCorrect } from "../utils/cryptoFunctions";
-import { connection } from "../utils/database.js";
+const cryptoFunc = require("../utils/cryptoFunctions.js"); 
+const connection = require("../utils/database.js"); 
 const fs = require("fs");
 
 function register(req, res) {
@@ -7,8 +7,8 @@ function register(req, res) {
     const username = req.body.username;
     const password = req.body.password;
 
-    let passValues = hashPassword(password);
-    let calculatedToken = generateAccessToken({ username: username });
+    let passValues = cryptoFunc.hashPassword(password);
+    let calculatedToken = cryptoFunc.generateAccessToken({ username: username });
 
     connection.query('INSERT INTO users (email, password, salt, iterations, username) VALUES (?, ?, ?, ?, ?)', [email, passValues.hash, passValues.salt, passValues.iterations, username], function (err, result) {
         if (err) {
@@ -40,23 +40,24 @@ function login(req, res) {
     const email = req.body.email;
     const password = req.body.password;
 
-    connection.query('SELECT password, salt, iterations FROM users WHERE username=(?)', [email], function (err, result) {
+    connection.query('SELECT password, salt, iterations, username FROM users WHERE email=(?)', [email], function (err, result) {
         if (err) {
-            //console.log("------------\n" + err);
+            res.sendStatus(500); 
         };
 
-        //console.log(isPasswordCorrect(result[0].password, result[0].salt, +result[0].iterations, password)); 
+        if (cryptoFunc.isPasswordCorrect(result[0].password, result[0].salt, +result[0].iterations, password)) {
 
-        if (isPasswordCorrect(result[0].password, result[0].salt, +result[0].iterations, password)) {
-
-            let generatedToken = generateAccessToken({ username: username });
+            let generatedToken = cryptoFunc.generateAccessToken({email: email});
 
             connection.query('INSERT INTO activeTokens (token) VALUES (?)', [generatedToken], function (err, result) {
-                if (err) throw err;
+                if (err) { 
+                    res.sendStatus(500);
+                }
             })
 
             res.send({
-                token: generatedToken
+                token: generatedToken,
+                username: result[0].username, 
             })
         }
     })

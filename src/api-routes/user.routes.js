@@ -1,10 +1,15 @@
 const express = require('express'); 
-const { helloWorld } = require('../controllers/user.controller');
-const autenciation = require("../middleware/authenciation.middleware"); 
+const userController = require('../controllers/user.controller.js');
+const autenciation = require("../middleware/authenciation.middleware.js"); 
 const router = express.Router(); 
 
+//GET
+router.get('/dashboard', autenciation, userController.getUserFiles); 
 
-router.post('/dashboard', autenciation, helloWorld); 
+
+
+//POST 
+router.post('/save', autenciation, userController.saveProject); 
 
 
 module.exports = router; 

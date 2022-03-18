@@ -10,9 +10,12 @@ const PrivateRoute = ({ ...rest }) => {
     useEffect(() => {
         // send jwt to API to see if it's valid
         let token = localStorage.getItem("token");
+        let username = localStorage.getItem("username"); 
+
         if (token) {
-            fetch('http://localhost:5000/auth', {
+            fetch('http://localhost:5000/' + username + '/auth', {
                 method: 'GET',
+                params: JSON.stringify(username), 
                 headers: {
                     'Content-Type': 'application/json', 
                     'Authorization' : token
